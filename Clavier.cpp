@@ -37,7 +37,10 @@
 //---------------------------------------------------- Fonctions publiques
 void Clavier ( )
 {
-    Menu ( );
+    for (;;)
+    {
+        Menu ( );
+    }
 }
 
 void Commande (char c, unsigned int valeur)
