@@ -10,6 +10,7 @@
 
 /////////////////////////////////////////////////////////////////  INCLUDE
 //-------------------------------------------------------- Include système
+#include <stdlib.h>
 
 //------------------------------------------------------ Include personnel
 #include "Clavier.h"
@@ -40,7 +41,7 @@ void Clavier ( )
     Menu ( );
 }
 
-void Commande (char c, unsigned int valeur)
+void Commande (char code, unsigned int valeur)
 // Algorithme :
 //
 {

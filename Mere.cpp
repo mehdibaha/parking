@@ -11,9 +11,11 @@
 /////////////////////////////////////////////////////////////////  INCLUDE
 //-------------------------------------------------------- Include système
 #include <sys/unistd.h>
+#include <sys/wait.h>
 
 //------------------------------------------------------ Include personnel
 #include "Mere.h"
+#include "Clavier.h"
 #include "Outils.h"
 
 ///////////////////////////////////////////////////////////////////  PRIVE
@@ -49,7 +51,7 @@ int main ( int argc, char ** argv )
     }
     else
     {
-        waitpid(clavier);
+        waitpid(clavier, NULL, 0);
         TerminerApplication ( );
     }
 } //----- fin de Main

@@ -9,7 +9,7 @@ INTPATH = -I/share/public/tp/tp-multitache
 RMFLAGS = -f
 EDLFLAGS = -std=c++11
 LIBS = -ltp -lncurses -ltcl
-INTERFACE = Mere.h
+INTERFACE = Mere.h Clavier.h
 REAL = $(INTERFACE:.h=.cpp)
 OBJ = $(INTERFACE:.h=.o)
 

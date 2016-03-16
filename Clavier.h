@@ -32,7 +32,7 @@ void Clavier();
 // Contrat :
 //
 
-void Commande(char c, unsigned int valeur);
+void Commande(char code, unsigned int valeur);
 // Mode d'emploi :
 // 
 // Contrat :
