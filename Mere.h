@@ -6,7 +6,7 @@
     e-mail               : XXX
 *************************************************************************/
 
-//---------- Interface de la tâche <Mere> (fichier <Mere>.h) -------
+//---------- Interface de la tâche <Mere> (fichier Mere.h) -------
 
 #if !defined ( MERE_H )
 #define MERE_H

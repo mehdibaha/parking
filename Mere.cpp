@@ -6,11 +6,11 @@
     e-mail               : XXX
 *************************************************************************/
 
-//---------- Réalisation de la tâche <Mere> (fichier <Mere>.cpp) ---
+//---------- Réalisation de la tâche <Mere> (fichier Mere.cpp) ---
 
 /////////////////////////////////////////////////////////////////  INCLUDE
 //-------------------------------------------------------- Include système
-#include <sys/wait.h>
+#include <sys/unistd.h>
 
 //------------------------------------------------------ Include personnel
 #include "Mere.h"
@@ -42,7 +42,8 @@ int main ( int argc, char ** argv )
 {
     enum TypeTerminal xt = XTERM;
     InitialiserApplication ( xt );
-    sleep(10);
+	    
+fork();
     TerminerApplication ( );
 } //----- fin de Main
 

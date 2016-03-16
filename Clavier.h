@@ -6,7 +6,7 @@
     e-mail               : XXX
 *************************************************************************/
 
-//---------- Interface de la tâche <Clavier> (fichier <Clavier>.h) -------
+//---------- Interface de la tâche <Clavier> (fichier Clavier.h) -------
 
 #if !defined ( CLAVIER_H )
 #define CLAVIER_H
@@ -26,11 +26,16 @@
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-// type Nom ( liste de paramètres );
+void Clavier();
 // Mode d'emploi :
 //
 // Contrat :
 //
 
-#endif // XXX_H
+void Commande(char c, unsinged int valeur);
+// Mode d'emploi :
+// 
+// Contrat :
+//
 
+#endif // XXX_H

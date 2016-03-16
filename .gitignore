@@ -4,6 +4,7 @@
 *.o
 *.obj
 .idea/*
+parking
 
 # Precompiled Headers
 *.gch

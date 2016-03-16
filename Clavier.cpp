@@ -6,13 +6,14 @@
     e-mail               : XXX
 *************************************************************************/
 
-//---------- Réalisation de la tâche <Clavier> (fichier <Clavier>.cpp) ---
+//---------- Réalisation de la tâche <Clavier> (fichier Clavier.cpp) ---
 
 /////////////////////////////////////////////////////////////////  INCLUDE
 //-------------------------------------------------------- Include système
 
 //------------------------------------------------------ Include personnel
 #include "Clavier.h"
+#include "Menu.h"
 
 ///////////////////////////////////////////////////////////////////  PRIVE
 //------------------------------------------------------------- Constantes
@@ -34,9 +35,22 @@
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-//type Nom ( liste de paramètres )
+void Clavier ( )
+{
+	Menu ( );
+}
+
+void Commande (char c, unsigned int valeur)
 // Algorithme :
 //
-//{
-//} //----- fin de Nom
+{
+	switch(code)
+	{
+		case 'E':
+		case 'e':
+			exit(0);
+		default:
+			break;
+	}
+} //----- fin de Commande
 
