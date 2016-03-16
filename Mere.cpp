@@ -42,8 +42,15 @@ int main ( int argc, char ** argv )
 {
     enum TypeTerminal xt = XTERM;
     InitialiserApplication ( xt );
-	    
-fork();
-    TerminerApplication ( );
+    pid_t clavier;
+    if ((clavier = fork()) == 0)
+    {
+        Clavier();
+    }
+    else
+    {
+        waitpid(clavier);
+        TerminerApplication ( );
+    }
 } //----- fin de Main
 

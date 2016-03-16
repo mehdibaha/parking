@@ -37,14 +37,14 @@
 //---------------------------------------------------- Fonctions publiques
 void Clavier ( )
 {
-	Menu ( );
+    Menu ( );
 }
 
 void Commande (char c, unsigned int valeur)
 // Algorithme :
 //
 {
-	switch(code)
+    switch(code)
 	{
 		case 'E':
 		case 'e':
