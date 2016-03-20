@@ -23,3 +23,5 @@ $(EXE) : $(OBJ)
 
 $(CLEAN) :
 	$(RM) $(RMFLAGS) *.o $(EXE) core
+
+#TODO : rajouter les dépendances supplémentaires

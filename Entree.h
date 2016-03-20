@@ -1,18 +1,17 @@
 /*************************************************************************
-                           <Clavier>  -  description
+                           Entree  -  description
                              -------------------
-    début                : XXX
-    copyright            : (C) XXX par XXX
-    e-mail               : XXX
+    début                : 
+    copyright            : (C)  par 
+    e-mail               : 
 *************************************************************************/
 
-//---------- Interface de la tâche <Clavier> (fichier Clavier.h) -------
-
-#if !defined ( CLAVIER_H )
-#define CLAVIER_H
+//---------- Interface de la tâche <Entree> (fichier Entree.h) -------
+#if ! defined ( ENTREE_H )
+#define ENTREE_H
 
 //------------------------------------------------------------------------
-// Rôle de la tâche <Clavier>
+// Rôle de la tâche <Entree>
 //
 //
 //------------------------------------------------------------------------
@@ -26,16 +25,12 @@
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-void Clavier( int balID );
+void Entree(	int parkingID, int compteurVoituresID, int nombrePlacesOccupeesID,
+				int requeteID, int semID, int numSemRequete );
 // Mode d'emploi :
 //
 // Contrat :
 //
 
-void Commande(char code, unsigned int valeur);
-// Mode d'emploi :
-// 
-// Contrat :
-//
+#endif // ENTREE_H
 
-#endif // XXX_H

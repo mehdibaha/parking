@@ -36,7 +36,7 @@
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-void Clavier ( )
+void Clavier ( int balID )
 {
     for (;;)
     {
@@ -44,15 +44,15 @@ void Clavier ( )
     }
 }
 
-void Commande (char code, unsigned int valeur)
+void Commande ( char code, unsigned int valeur )
 // Algorithme :
 //
 {
-    switch(code)
+    switch( code )
 	{
 		case 'E':
 		case 'e':
-			exit(0);
+			exit( 0 );
 		default:
 			break;
 	}
