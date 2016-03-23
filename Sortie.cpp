@@ -23,6 +23,28 @@
 //---------------------------------------------------- Variables statiques
 
 //------------------------------------------------------ Fonctions privées
+static void fin ( int noSignal )
+// Mode d'emploi :
+//
+// Contrat :
+//
+// Algorithme :
+//
+{
+	
+} //----- fin de fin
+
+
+static void mortFils ( int noSignal )
+// Mode d'emploi :
+//
+// Contrat :
+//
+// Algorithme :
+//
+{
+	
+} //----- fin de fin
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
@@ -38,9 +60,27 @@ void Sortie( int parkingID, int nombrePlacesOccupeesID, int* requetesID, int nbR
 	struct placeParking* parking = shmat(parkingID, NULL, NULL);
 	int* nbPlacesOccupees = shmat(nombrePlacesOccupeesID, NULL, NULL);
 	
+	// Masquage signal
+	struct sigaction sigusr2Action;
+	sigusr2Action.sa_handler = fin;
+	sigemptyset( &sigusr2Action.sa_mask );
+	sigusr2Action.sa_flags = 0;
+	sigaction( SIGUSR2, &sigusr2Action, NULL );
+	
+	struct sigaction sigchldAction;
+	sigchldAction.sa_handler = cleanFin;
+	sigemptyset( &sigchldAction.sa_mask );
+	sigchldAction.sa_flags = 0;
+	sigaction( SIGINT, &sigchldAction, NULL );
+	
 	// MOTEUR
 	
 	// DESTRUCTION
+	shmdt(nbPlacesOccupees);
+	shmdt(parking);
+	shmdt(requeteEGB_autres);
+	shmdt(requeteEBP_profs);
+	shmdt(requeteEGB);
 	
 } //----- fin de Nom
 
