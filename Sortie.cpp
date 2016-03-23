@@ -16,6 +16,7 @@
 #include <sys/shm.h>
 #include <list>
 #include <ctime>
+#include <cstdlib>
 
 //------------------------------------------------------ Include personnel
 #include "Sortie.h"
@@ -33,9 +34,10 @@ typedef std::list::const_iterator ConstListeFilsIterator;
 //---------------------------------------------------- Variables statiques
 static std::list listeFils;
 static int semaphoreID;
+static pid_t* entreesPID;
+
 static struct placeParking* parking;
 static int* nbPlacesOccupees;
-static pid_t* entreesPID;
 struct requeteEntree* requeteEGB;
 struct requeteEntree* requeteEBP_profs;
 struct requeteEntree* requeteEGB_autres;
@@ -49,6 +51,21 @@ static void fin ( int noSignal )
 // Algorithme :
 //
 {
+	sigaction( SIGCHLD, NULL, NULL );
+	shmdt( nbPlacesOccupees );
+	shmdt( parking ;
+	shmdt( requeteEGB_autres );
+	shmdt( requeteEBP_profs );
+	shmdt( requeteEGB );
+	
+	ListeFilsIterator itr;
+	for ( itr = listeFils.begin( ); itr != listeFils.end(); itr++ )
+	{
+		kill( SIGUSR2, *itr, NULL );
+		waitpid( *itr, NULL, 0 );
+	}
+	
+	exit(0);
 	
 } //----- fin de fin
 
@@ -183,7 +200,6 @@ static void mortFils ( int noSignal )
 			
 			kill( entreeADebloquer, SIGUSR1, NULL );
 		}
-		
 	}
 	
 } //----- fin de fin
@@ -218,7 +234,7 @@ void Sortie( int parkingID, int balID, int nombrePlacesOccupeesID, int* requetes
 	sigchldAction.sa_handler = mortFils;
 	sigemptyset( &sigchldAction.sa_mask );
 	sigchldAction.sa_flags = 0;
-	sigaction( SIGINT, &sigchldAction, NULL );
+	sigaction( SIGCHLD, &sigchldAction, NULL );
 	
 	// MOTEUR
 	// Attendre devant la boite aux lettres
@@ -243,12 +259,7 @@ void Sortie( int parkingID, int balID, int nombrePlacesOccupeesID, int* requetes
 	}
 	
 	// DESTRUCTION
-	shmdt(nbPlacesOccupees);
-	shmdt(parking);
-	shmdt(requeteEGB_autres);
-	shmdt(requeteEBP_profs);
-	shmdt(requeteEGB);
-	//TODO : demasquer sigchld
+	// Via handler de SIGUSR2
 	
 } //----- fin de Nom
 
