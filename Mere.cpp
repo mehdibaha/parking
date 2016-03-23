@@ -97,15 +97,15 @@ int main ( int argc, char ** argv )
 	
     /*if( ( entreeGB = fork( ) ) == 0 )
     {
-        Entree( parkingID, compteurVoituresID, nombrePlacesOccupeesID, requeteID1, semID, SEM_REQUETE_GB );
+        Entree( parkingID, compteurVoituresID, nombrePlacesOccupeesID, requeteID[REQ_GB], semID, SEM_REQUETE_GB );
     }
 	else if( ( entreeProfsBP = fork( ) ) == 0 )
 	{
-		Entree( parkingID, compteurVoituresID, nombrePlacesOccupeesID, requeteID2, semID, SEM_REQUETE_BP_PROFS );
+		Entree( parkingID, compteurVoituresID, nombrePlacesOccupeesID, requeteID[REQ_BP_PROFS], semID, SEM_REQUETE_BP_PROFS );
 	}
 	else if( ( entreeAutresBP = fork( ) ) == 0 )
 	{
-		Entree( parkingID, compteurVoituresID, nombrePlacesOccupeesID, requeteID3, semID, SEM_REQUETE_BP_AUTRES );
+		Entree( parkingID, compteurVoituresID, nombrePlacesOccupeesID, requeteID[REQ_BP_AUTRES], semID, SEM_REQUETE_BP_AUTRES );
 	}
 	else if( ( sortie = fork( ) ) == 0 )
 	{

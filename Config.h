@@ -27,6 +27,10 @@
 #define NB_REQUETES 3
 #define NB_SEGMENTS_A_PROTEGER 6
 
+#define REQ_GB 0
+#define REQ_BP_PROFS 1
+#define REQ_BP_AUTRES 2
+
 #define SEM_PARKING 0
 #define SEM_COMPTEUR 1
 #define SEM_NB_PLACES_OCCUPEES 2
