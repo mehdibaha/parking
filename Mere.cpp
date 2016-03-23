@@ -110,7 +110,12 @@ int main ( int argc, char ** argv )
 	}
 	else if( ( sortie = fork( ) ) == 0 )
 	{
-		Sortie( parkingID, balID, nombrePlacesOccupeesID, requetesID, semID );
+		pid_t entreesID[NB_ENTREES];
+		entreesID[NUM_PID_ENTREE_GB] = entreeGB;
+		entreesID[NUM_PID_ENTREE_BP_PROFS] = entreeProfsBP;
+		entreesID[NUM_PID_ENTREE_BP_AUTRES] = entreeAutresBP;
+		
+		Sortie( parkingID, balID, nombrePlacesOccupeesID, requetesID, semID, entreesID );
 	}
     else */if( ( clavier = fork( ) ) == 0 )
 	{

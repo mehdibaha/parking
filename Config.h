@@ -27,6 +27,10 @@
 #define NB_REQUETES 3
 #define NB_SEGMENTS_A_PROTEGER 6
 
+#define NUM_PID_ENTREE_GB 0
+#define NUM_PID_ENTREE_BP_PROFS 1
+#define NUM_PID_ENTREE_BP_AUTRES 2
+
 #define REQ_GB 0
 #define REQ_BP_PROFS 1
 #define REQ_BP_AUTRES 2
@@ -59,7 +63,7 @@ struct placeParking
 {
 	unsigned int numPlace;
 	unsigned int numVoiture;
-	enum TypeUsager;
+	enum TypeUsager usager;
 	time_t heureArrive;
 };
 
@@ -67,7 +71,7 @@ struct requeteEntree
 {
 	unsigned int numVoiture;
 	enum TypeUsager usager;
-	time_t heure;
+	time_t heureArrive;
 };
 
 //////////////////////////////////////////////////////////////////  PUBLIC

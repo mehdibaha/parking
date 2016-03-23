@@ -25,7 +25,7 @@
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-void Sortie( int parkingID, int balID, int nombrePlacesOccupeesID, int* requetesID, int semID );
+void Sortie( int parkingID, int balID, int nombrePlacesOccupeesID, int* requetesID, int semID, pid_t* entreesID );
 // Mode d'emploi :
 //
 // Contrat :
