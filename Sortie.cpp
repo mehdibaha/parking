@@ -48,7 +48,7 @@ static void mortFils ( int noSignal )
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-void Sortie( int parkingID, int nombrePlacesOccupeesID, int* requetesID, int nbRequetes )
+void Sortie( int parkingID, int balID, int nombrePlacesOccupeesID, int* requetesID, int nbRequetes )
 // Algorithme :
 //
 {

@@ -109,7 +109,7 @@ int main ( int argc, char ** argv )
 	}
 	else if( ( sortie = fork( ) ) == 0 )
 	{
-		Sortie( parkingID, nombrePlacesOccupeesID, requetesID, NB_REQUETES );
+		Sortie( parkingID, balID, nombrePlacesOccupeesID, requetesID, NB_REQUETES );
 			// NB :	Peut-etre est-ce mieux de passer quand même en paramètres le nombre de requêtes...
 	}
     else */if( ( clavier = fork( ) ) == 0 )
