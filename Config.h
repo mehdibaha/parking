@@ -31,6 +31,10 @@
 #define REQ_BP_PROFS 1
 #define REQ_BP_AUTRES 2
 
+#define MSG_TYPE_ENTREE_GB 0
+#define MSG_TYPE_ENTREE_BP 1
+#define MSG_TYPE_SORTIE 2
+
 #define SEM_PARKING 0
 #define SEM_COMPTEUR 1
 #define SEM_NB_PLACES_OCCUPEES 2
@@ -41,9 +45,9 @@
 //------------------------------------------------------------------ Types
 struct voiture
 // INFORMATIONS sur le type :
-//	1:	Entrée GB
-//	2:	Entrée BP
-//	3:	Sortie
+//	0:	Entrée GB
+//	1:	Entrée BP
+//	2:	Sortie
 {
 	long type;
 	int numVoiture;
