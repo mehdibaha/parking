@@ -31,9 +31,9 @@
 #define REQ_BP_PROFS 1
 #define REQ_BP_AUTRES 2
 
-#define MSG_TYPE_ENTREE_GB 0
-#define MSG_TYPE_ENTREE_BP 1
-#define MSG_TYPE_SORTIE 2
+#define MSG_TYPE_ENTREE_GB 1
+#define MSG_TYPE_ENTREE_BP 2
+#define MSG_TYPE_SORTIE 3
 
 #define SEM_PARKING 0
 #define SEM_COMPTEUR 1
@@ -45,25 +45,27 @@
 //------------------------------------------------------------------ Types
 struct voiture
 // INFORMATIONS sur le type :
-//	0:	Entrée GB
-//	1:	Entrée BP
-//	2:	Sortie
+//	1:	Entrée GB
+//	2:	Entrée BP
+//	3:	Sortie
 {
 	long type;
-	int numVoiture;
+	unsigned int numVoiture;
 	enum TypeUsager usager;
-	time_t heure;
+	time_t heureArrive;
 };
 
 struct placeParking
 {
-	int numPlace;
-	int numVoiture;
+	unsigned int numPlace;
+	unsigned int numVoiture;
+	enum TypeUsager;
+	time_t heureArrive;
 };
 
 struct requeteEntree
 {
-	int numVoiture;
+	unsigned int numVoiture;
 	enum TypeUsager usager;
 	time_t heure;
 };

@@ -18,6 +18,7 @@
 #include <sys/types.h>
 #include <sys/ipc.h>
 #include <signal.h>
+#include <cstdlib>
 
 //------------------------------------------------------ Include personnel
 #include "Mere.h"
@@ -109,8 +110,7 @@ int main ( int argc, char ** argv )
 	}
 	else if( ( sortie = fork( ) ) == 0 )
 	{
-		Sortie( parkingID, balID, nombrePlacesOccupeesID, requetesID, NB_REQUETES );
-			// NB :	Peut-etre est-ce mieux de passer quand même en paramètres le nombre de requêtes...
+		Sortie( parkingID, balID, nombrePlacesOccupeesID, requetesID, semID );
 	}
     else */if( ( clavier = fork( ) ) == 0 )
 	{
