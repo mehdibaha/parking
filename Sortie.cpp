@@ -124,7 +124,7 @@ static void mortFils ( int noSignal )
 		semOp.sem_op = -1;
 		semOp.semNum = SEM_COMPTEUR;
 		semop( semaphoreID, &semOp, 1 );
-			if(--nbPlacesOccupees == 7)
+			if(--nbPlacesOccupees == NB_PLACES_PARKING-1)
 			{
 				envoyerSignal = true;
 			}
