@@ -53,7 +53,7 @@ static void fin ( int noSignal )
 {
 	sigaction( SIGCHLD, NULL, NULL );
 	shmdt( nbPlacesOccupees );
-	shmdt( parking ;
+	shmdt( parking );
 	shmdt( requeteEGB_autres );
 	shmdt( requeteEBP_profs );
 	shmdt( requeteEGB );
@@ -104,17 +104,17 @@ static void mortFils ( int noSignal )
 		
 		// Mise à jour de l'affichage de la sortie
 		semop( semaphoreID, &semOp, 1 );
-			AfficherSortie( parking[numPlace].usager, parking[numPlace].numVoiture, parking[numPlace].heureArrive, heureDepart );
-			// NB : on dispose d'une ressource et on en demande une autre via AfficherSortie,
-			//		mais cela ne devrait pas mener à un interblocage.
-			semOp.sem_op = 1;
+		AfficherSortie( parking[numPlace].usager, parking[numPlace].numVoiture, parking[numPlace].heureArrive, heureDepart );
+		// NB : on dispose d'une ressource et on en demande une autre via AfficherSortie,
+		//		mais cela ne devrait pas mener à un interblocage.
+		semOp.sem_op = 1;
 		semop( semaphoreID, &semOp, 1 );
 		
 		// Mise à jour des places de parking
 		semOp.sem_op = -1;
 		semop( semaphoreID, &semOp, 1 );
-			parking[numPlace].usager = AUCUN;
-			semOp.sem_op = 1;
+		parking[numPlace].usager = AUCUN;
+		semOp.sem_op = 1;
 		semop( semaphoreID, &semOp, 1 );
 		
 		// Mise à jour du nombre de voitures
@@ -141,14 +141,14 @@ static void mortFils ( int noSignal )
 			
 			semOp.sem_op = -1;
 			semOp.semNum = NUM_ID_ENTREE_GB;
-				bestUsager = requeteEGB->usager
+				bestUsager = requeteEGB->usager;
 				meilleureHeure = requeteEGB->heureArrive;
 				semOp.sem_op = 1;
 			semop( semaphoreID, &semOp, 1 );
 			
 			semOp.sem_op = -1;
 			semOp.semNum = NUM_PID_ENTREE_BP_PROFS;
-				usager = requeteEBP_profs->usager
+				usager = requeteEBP_profs->usager;
 				heure = requeteEBP_profs->heureArrive;
 				semOp.sem_op = 1;
 			semop( semaphoreID, &semOp, 1 );
@@ -177,7 +177,7 @@ static void mortFils ( int noSignal )
 			
 			semOp.sem_op = -1;
 			semOp.semNum = NUM_PID_ENTREE_BP_AUTRES;
-				usager = requeteEBP_profs->usager
+				usager = requeteEBP_profs->usager;
 				heure = requeteEBP_profs->heureArrive;
 				semOp.sem_op = 1;
 			semop( semaphoreID, &semOp, 1 );

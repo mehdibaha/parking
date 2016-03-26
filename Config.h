@@ -26,6 +26,7 @@
 #define NB_ENTREES 3
 #define NB_REQUETES 3
 #define NB_SEGMENTS_A_PROTEGER 6
+#define NB_VOITURES_MAX 999
 
 #define NUM_PID_ENTREE_GB 0
 #define NUM_PID_ENTREE_BP_PROFS 1
@@ -72,6 +73,11 @@ struct requeteEntree
 	unsigned int numVoiture;
 	enum TypeUsager usager;
 	time_t heureArrive;
+};
+
+enum TypeUsager
+{
+	PROF, AUTRE, AUCUN
 };
 
 //////////////////////////////////////////////////////////////////  PUBLIC
