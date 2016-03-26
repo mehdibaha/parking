@@ -27,6 +27,7 @@
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 void Clavier( int balID );
+// TODO : verifier qu'il ne faut rien passer d'autre en parametres
 // Mode d'emploi :
 //
 // Contrat :

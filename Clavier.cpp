@@ -20,6 +20,8 @@
 
 ///////////////////////////////////////////////////////////////////  PRIVE
 //------------------------------------------------------------- Constantes
+//TODO :	va y avoir besoin de faire des globaux pour stocker ce que prend
+//			Clavier() en parametre, pour que Commande() puisse les utiliser
 
 //------------------------------------------------------------------ Types
 typedef struct voiture Voiture;
@@ -65,12 +67,17 @@ void Commande ( char code, unsigned int valeur )
 		case 'P':
 		case 'p':
 			voiture = creerVoiture(TypeUsager::PROF, valeur);
+			// TODO :	déposer un message dans la boite associée
+			// NB :	une seule boite mais plusieurs files, suffit de mettre la bonne valeur de
+			//		long type (voir config .h, dans les #define)
 		case 'A':
 		case 'a':
 			voiture = creerVoiture(TypeUsager::AUTRE, valeur);
+			// TODO :	déposer un message dans la boite associée
 		case 'S':
 		case 's':
 			voiture = creerVoiture(TypeUsager::AUCUN, valeur);
+			// TODO :	déposer un message dans la boite associée
 		default:
 			break;
 	}

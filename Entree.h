@@ -27,6 +27,8 @@
 //---------------------------------------------------- Fonctions publiques
 void Entree(	int parkingID, int compteurVoituresID, int nombrePlacesOccupeesID,
 				int requeteID, int semID, int numSemRequete );
+// TODO :	il va très certainement falloir passer en parametre le type de message à envoyer.
+//			On ne peut pas le mettre en brut ici, car toutes les entrees vont partager le meme code.
 // Mode d'emploi :
 //
 // Contrat :

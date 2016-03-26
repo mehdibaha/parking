@@ -17,12 +17,15 @@
 ///////////////////////////////////////////////////////////////////  PRIVE
 //------------------------------------------------------------- Constantes
 
+
 //------------------------------------------------------------------ Types
 typedef std::list<pid_t> ListeFils;
 typedef std::list::iterator ListeFilsIterator;
 typedef std::list::const_iterator ConstListeFilsIterator;
 
 //---------------------------------------------------- Variables statiques
+// TODO :	les variables statiques, ce sont des globaux privés.
+//			Faut les mettre dans la rubrique prévue.
 static int semaphoreID;
 static int compteurId;
 static int parkId;
@@ -40,6 +43,12 @@ struct requeteEntree* requeteEGB_autres;
 static std::list listeFils;
 
 //------------------------------------------------------ Fonctions privées
+// TODO :	Lorsque Entree est coincée parcequ'il n'y a plus de places dans le parking,
+//			c'est sortie qui la débloque en lui envoyant un signal SIGUSR1.
+//			Il faut donc handle ce signal
+//			Attention il va y avoir des variables à remettre à jour (par exemple la MP de requete)
+
+
 static void fin ( int noSignal )
 // Mode d'emploi :
 //
@@ -61,6 +70,13 @@ static void fin ( int noSignal )
 static void mortFils ( int noSignal )
 // Mode d'emploi :
 //
+// TODO :	la mort d'un fils, ça veut dire quoi ? ca veut dire qu'une voiture s'est effectivement garée.
+//			Il faut donc :
+//				-> Mettre à jour l'affichage
+//				-> Mettre à jour le tableaux des places de parking
+//				-> Mettre à jour le nombre de voitures présentes
+//				(ordre à vérifier)
+//			Pas besoin d'envoyer un signal
 {
     // Prises des informations liées à la mort du fils
     int statut;
@@ -137,6 +153,8 @@ void Entree( int parkingID, int compteurVoituresID, int nombrePlacesOccupeesID,
     sigemptyset( &sigusr2Action.sa_mask );
     sigusr2Action.sa_flags = 0;
     sigaction( SIGUSR2, &sigusr2Action, NULL );
+	
+	// TODO : masquer SIGUSR1
 
     // Armer SIGCHLD sur mortFils
     struct sigaction sigchldAction;
@@ -145,9 +163,16 @@ void Entree( int parkingID, int compteurVoituresID, int nombrePlacesOccupeesID,
     sigchldAction.sa_flags = 0;
     sigaction( SIGCHLD, &sigchldAction, NULL );
 
-
+	// TODO :	phase moteur
+	//			On est planté devant la boite aux lettres : on attend qu'une voiture arrive
+	//			Si c'est le cas, on vérifie le nombre de places dispos
+	//			Si il y a de la place, on l'envoit se garer et on garde une trace du PID fils pour arret forcé de l'appli,
+	//			(et on pose une requete ? à vérifier, j'ai un doute d'un seul coup)
+	//			Sinon, on dépose une requête et on attend SIGUSR1 (dodo)
+	//			Ensuite on se replante devant la boite.
 
     Voiture voiture;
+	
 
 } //----- fin de Entree
 
