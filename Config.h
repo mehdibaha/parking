@@ -76,11 +76,6 @@ struct requeteEntree
 	time_t heureArrive;
 };
 
-enum TypeUsager
-{
-	PROF, AUTRE, AUCUN
-};
-
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 // type Nom ( liste de paramètres );
