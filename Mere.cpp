@@ -73,6 +73,7 @@ int main ( int argc, char ** argv )
 	int parkingID = shmget( ftok(argv[0], 'p'), NB_PLACES_PARKING*sizeof(struct placeParking), IPC_CREAT | 600 );
 	int compteurVoituresID = shmget( IPC_PRIVATE, sizeof(unsigned int), IPC_CREAT | 600 );
 	int nombrePlacesOccupeesID = shmget( IPC_PRIVATE, sizeof(unsigned int), IPC_CREAT | 600 );
+	int immatriculationID = shmget( IPC_PRIVATE, sizeof(unsigned int), IPC_CREAT | 600 );
 	int requetesID[NB_REQUETES];
 	for( int i = 0; i<NB_REQUETES; i++ )
 	{

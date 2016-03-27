@@ -25,7 +25,7 @@
 #define NB_PLACES_PARKING 8
 #define NB_ENTREES 3
 #define NB_REQUETES 3
-#define NB_SEGMENTS_A_PROTEGER 6
+#define NB_SEGMENTS_A_PROTEGER 7
 #define NB_VOITURES_MAX 999
 
 #define NUM_PID_ENTREE_GB 0
@@ -46,6 +46,7 @@
 #define SEM_REQUETE_GB 3
 #define SEM_REQUETE_BP_PROFS 4
 #define SEM_REQUETE_BP_AUTRES 5
+#define SEM_IMMATRICULATION 6
 
 //------------------------------------------------------------------ Types
 struct voiture
