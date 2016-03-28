@@ -25,8 +25,8 @@
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-void Entree( int balID, int parkingID, int compteurVoituresID, int nombrePlacesOccupeesID,
-				int requeteID, int semID, int numSemRequete, int immatId, long type );
+void Entree( int balID, int parkingID, int immatriculationID, int nombrePlacesOccupeesID,
+				int requeteID, int semID, int numSemRequete, long type );
 // TODO :	il va très certainement falloir passer en parametre le type de message à envoyer.
 //			On ne peut pas le mettre en brut ici, car toutes les entrees vont partager le meme code.
 // Mode d'emploi :

@@ -14,9 +14,10 @@
 #include <errno.h>
 #include <sys/msg.h>
 #include <sys/shm.h>
+#include <sys/wait.h>
+#include <sys/sem.h>
 #include <list>
 #include <ctime>
-#include <cstdlib>
 
 //------------------------------------------------------ Include personnel
 #include "Sortie.h"
@@ -28,16 +29,20 @@
 
 //------------------------------------------------------------------ Types
 typedef std::list<pid_t> ListeFils;
-typedef std::list::iterator ListeFilsIterator;
-typedef std::list::const_iterator ConstListeFilsIterator;
+typedef std::list<pid_t>::iterator ListeFilsIterator;
+typedef std::list<pid_t>::const_iterator ConstListeFilsIterator;
 
 //---------------------------------------------------- Variables statiques
-static std::list listeFils;
+static ListeFils listeFils;
+
+static int parkID;
+static int nbPlacesID;
 static int semaphoreID;
+static int* reqsID;
 static pid_t* entreesPID;
 
 static struct placeParking* parking;
-static int* nbPlacesOccupees;
+static int* nbPlaces;
 struct requeteEntree* requeteEGB;
 struct requeteEntree* requeteEBP_profs;
 struct requeteEntree* requeteEGB_autres;
@@ -52,7 +57,7 @@ static void fin ( int noSignal )
 //
 {
 	sigaction( SIGCHLD, NULL, NULL );
-	shmdt( nbPlacesOccupees );
+	shmdt( nbPlaces );
 	shmdt( parking );
 	shmdt( requeteEGB_autres );
 	shmdt( requeteEBP_profs );
@@ -61,7 +66,7 @@ static void fin ( int noSignal )
 	ListeFilsIterator itr;
 	for ( itr = listeFils.begin( ); itr != listeFils.end(); itr++ )
 	{
-		kill( SIGUSR2, *itr, NULL );
+		kill( *itr, SIGUSR2 );
 		waitpid( *itr, NULL, 0 );
 	}
 	
@@ -86,7 +91,7 @@ static void mortFils ( int noSignal )
 	
 	// On recherche le fils mort de la liste des fils
 	ListeFilsIterator itr = listeFils.begin( );
-	while ( itr != pidFils || itr != listeFils.end( ) )
+	while ( itr != listeFils.end( ) || *itr != pidFils )
 	{
 		itr++;
 	}
@@ -98,9 +103,9 @@ static void mortFils ( int noSignal )
 		
 		// Init sembuf
 		struct sembuf semOp;
-		semOp.semNum = SEM_PARKING;
+		semOp.sem_num = SEM_PARKING;
 		semOp.sem_op = -1;
-		semOp.sem_flags = NULL;
+		semOp.sem_flg = NULL;
 		
 		// Mise à jour de l'affichage de la sortie
 		semop( semaphoreID, &semOp, 1 );
@@ -122,9 +127,9 @@ static void mortFils ( int noSignal )
 		pid_t entreeADebloquer;
 		
 		semOp.sem_op = -1;
-		semOp.semNum = SEM_COMPTEUR;
+		semOp.sem_num = SEM_COMPTEUR;
 		semop( semaphoreID, &semOp, 1 );
-			if(--nbPlacesOccupees == NB_PLACES_PARKING-1)
+			if(--(*nbPlaces) == NB_PLACES_PARKING-1)
 			{
 				envoyerSignal = true;
 			}
@@ -140,14 +145,14 @@ static void mortFils ( int noSignal )
 			enum TypeUsager bestUsager = AUCUN;
 			
 			semOp.sem_op = -1;
-			semOp.semNum = NUM_ID_ENTREE_GB;
+			semOp.sem_num = NUM_PID_ENTREE_GB;
 				bestUsager = requeteEGB->usager;
 				meilleureHeure = requeteEGB->heureArrive;
 				semOp.sem_op = 1;
 			semop( semaphoreID, &semOp, 1 );
 			
 			semOp.sem_op = -1;
-			semOp.semNum = NUM_PID_ENTREE_BP_PROFS;
+			semOp.sem_num = NUM_PID_ENTREE_BP_PROFS;
 				usager = requeteEBP_profs->usager;
 				heure = requeteEBP_profs->heureArrive;
 				semOp.sem_op = 1;
@@ -176,7 +181,7 @@ static void mortFils ( int noSignal )
 			}
 			
 			semOp.sem_op = -1;
-			semOp.semNum = NUM_PID_ENTREE_BP_AUTRES;
+			semOp.sem_num = NUM_PID_ENTREE_BP_AUTRES;
 				usager = requeteEBP_profs->usager;
 				heure = requeteEBP_profs->heureArrive;
 				semOp.sem_op = 1;
@@ -198,7 +203,7 @@ static void mortFils ( int noSignal )
 				entreeADebloquer = entreesPID[NUM_PID_ENTREE_BP_AUTRES];
 			}
 			
-			kill( entreeADebloquer, SIGUSR1, NULL );
+			kill( entreeADebloquer, SIGUSR1 );
 		}
 	}
 	
@@ -212,8 +217,10 @@ void Sortie( int parkingID, int balID, int nombrePlacesOccupeesID, int* requetes
 {
 	// INITIALISATION
 	// Mise à jour des variables globales
-	semaphoreID = semID;
 	parkID = parkingID;
+	nbPlacesID = nombrePlacesOccupeesID;
+	semaphoreID = semID;
+	reqsID = requetesID;
 	entreesPID = entreesID;
 	
 	// Attachement aux mps
@@ -221,7 +228,7 @@ void Sortie( int parkingID, int balID, int nombrePlacesOccupeesID, int* requetes
 	requeteEBP_profs = (requeteEntree*) shmat( requetesID[REQ_BP_PROFS], NULL, NULL );
 	requeteEGB_autres = (requeteEntree*) shmat( requetesID[REQ_BP_AUTRES], NULL, NULL );
 	parking = (placeParking*) shmat( parkingID, NULL, NULL );
-	nbPlacesOccupees = (int*) shmat( nombrePlacesOccupeesID, NULL, NULL );
+	nbPlaces = (int*) shmat( nombrePlacesOccupeesID, NULL, NULL );
 	
 	// Masquage signal
 	struct sigaction sigusr2Action;
@@ -239,7 +246,7 @@ void Sortie( int parkingID, int balID, int nombrePlacesOccupeesID, int* requetes
 	// MOTEUR
 	// Attendre devant la boite aux lettres
 	struct voiture message;
-	while( msgrcv( balID, (void*) &message, sizeof(struct message)-sizeof(long), MSG_TYPE_SORTIE ) == -1 && errno == EINTR );
+	while( msgrcv( balID, (void*) &message, sizeof(struct voiture)-sizeof(long), MSG_TYPE_SORTIE, NULL ) == -1 && errno == EINTR );
 	
 	// Lancer la tache qui va faire sortir la voiture
 	unsigned int i;

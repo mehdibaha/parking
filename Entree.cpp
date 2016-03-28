@@ -10,9 +10,21 @@
 
 /////////////////////////////////////////////////////////////////  INCLUDE
 //-------------------------------------------------------- Include système
+using namespace std;
+#include <map>
+#include <cstdlib>
+#include <errno.h>
+#include <sys/msg.h>
+#include <sys/shm.h>
+#include <sys/sem.h>
+#include <sys/wait.h>
+#include <list>
+#include <ctime>
 
 //------------------------------------------------------ Include personnel
 #include "Entree.h"
+#include "Config.h"
+#include "Outils.h"
 
 ///////////////////////////////////////////////////////////////////  PRIVE
 //------------------------------------------------------------- Constantes
@@ -23,20 +35,18 @@ typedef struct voiture Voiture;
 typedef struct requeteEntree RequeteEntree;
 
 //---------------------------------------------------- Variables statiques
-// TODO :	les variables statiques, ce sont des globaux privés.
-//			Faut les mettre dans la rubrique prévue.
-static int semaphoreID;
-static int compteurId;
-static int parkID;
 static int boiteID;
-
-static int* nbPlacesOccupees;
+static int parkID;
+static int immatID;
+static int nbPlacesID;
+static int reqID;
+static int semaphoreID;
+static int numSemReq;
 
 static struct placeParking* parking;
-
-struct requeteEntree* requeteEGB;
-struct requeteEntree* requeteEBP_profs;
-struct requeteEntree* requeteEGB_autres;
+static int* immatriculation;
+static int* nbPlaces;
+struct requeteEntree* req;
 
 static map<pid_t,Voiture> voitureMap;
 
@@ -52,13 +62,13 @@ static void fin ( int noSignal )
 //
 {
     sigaction( SIGCHLD, NULL, NULL );
-    shmdt( nbPlacesOccupees );
-    shmdt( parking );
-    shmdt( requeteEGB_autres );
-    shmdt( requeteEBP_profs );
-    shmdt( requeteEGB );
+	
+	shmdt( parking );
+    shmdt( nbPlaces );
+    shmdt( req );
+    shmdt( immatriculation );
 
-    for ( auto itr = voitureMap.begin( ); itr != listeFils.end(); itr++ )
+    for ( auto itr = voitureMap.begin( ); itr != voitureMap.end(); itr++ )
     {
         kill( itr->first, SIGUSR2 );
         waitpid( itr->first, NULL, 0 );
@@ -95,9 +105,9 @@ static void mortFils ( int noSignal )
 
         // Init sembuf
         struct sembuf semOp;
-        semOp.semNum = SEM_PARKING;
+        semOp.sem_num = SEM_PARKING;
         semOp.sem_op = -1;
-        semOp.sem_flags = NULL;
+        semOp.sem_flg = NULL;
 
         // Mise à jour des places de parking
         semOp.sem_op = -1;
@@ -105,7 +115,7 @@ static void mortFils ( int noSignal )
         parking[numPlace].heureArrive = heureEntree;
         parking[numPlace].numVoiture = v.numVoiture ;
         parking[numPlace].usager = v.usager ;
-        nbPlacesOccupees++;
+        nbPlaces++;
         semOp.sem_op = 1;
         semop( semaphoreID, &semOp, 1 );
 
@@ -113,7 +123,7 @@ static void mortFils ( int noSignal )
         // Mise à jour de l'affichage de l'entrée
         semOp.sem_op = -1;
         semop( semaphoreID, &semOp, 1 );
-        AfficherPlace(v.usager, v.numVoiture, v.heureArrive, heureEntree);
+        AfficherPlace(v.numVoiture, v.usager, v.heureArrive, heureEntree);
         semOp.sem_op = 1;
         semop( semaphoreID, &semOp, 1 );
 
@@ -128,14 +138,15 @@ static void moteur( long type )
 {
     Voiture message;
 
-    while( msgrcv( boiteID, (void*) &message, sizeof(struct message)-sizeof(long), type ) == -1 && errno == EINTR );
+    while( msgrcv( boiteID, (void*) &message, sizeof(struct voiture)-sizeof(long), type, NULL ) == -1 && errno == EINTR );
 
     // Lancer la tâche qui va faire rentrer la voiture
-    if (nbPlacesOccupees < NB_PLACES_PARKING)
+	// TODO : heu, lecture d'une MP ligne en dessous... mutex ?
+    if (*nbPlaces < NB_PLACES_PARKING)
     {
         RequeteEntree requete;
         requete.numVoiture = voitureMap.size(); // CHOIX DE NUMEROTATION
-        requete.usager = message.typeUsager;
+        requete.usager = message.usager;
         requete.heureArrive = time(NULL);
 
         TypeBarriere typeBarriere;
@@ -145,15 +156,15 @@ static void moteur( long type )
         }
         else if (type == 2)
         {
-            if (message.typeUsager == PROF)
+            if (message.usager == PROF)
                 typeBarriere = PROF_BLAISE_PASCAL;
             else
                 typeBarriere = AUTRE_BLAISE_PASCAL;
         }
 
-        DessinerVoitureBarriere(typeBarriere, message.typeUsager);
+        DessinerVoitureBarriere(typeBarriere, message.usager);
 
-        AfficherRequete(typebarriere, message.typeUsager, requete.heureArrive);
+        AfficherRequete(typeBarriere, message.usager, requete.heureArrive);
 
         pid_t pidCourant = GarerVoiture(typeBarriere);
         if (pidCourant != -1)
@@ -169,11 +180,12 @@ static void init( )
 {
     // Attachement aux mps
     parking = (placeParking*) shmat( parkID, NULL, NULL );
-    nbPlacesOccupees = (int*) shmat( nombrePlacesOccupeesID, NULL, NULL );
-    requeteEGB = (requeteEntree*) shmat( requetesID[REQ_GB], NULL, NULL );
-    requeteEBP_profs = (requeteEntree*) shmat( requetesID[REQ_BP_PROFS], NULL, NULL );
-    requeteEGB_autres = (requeteEntree*) shmat( requetesID[REQ_BP_AUTRES], NULL, NULL );
+    nbPlaces = (int*) shmat( nbPlacesID, NULL, NULL );
+    req = (requeteEntree*) shmat( reqID, NULL, NULL );
+	immatriculation = (int*) shmat( immatID, NULL, NULL );
 
+	// TODO: Handle SIGUSR1
+	
     // Armer SIGUSR2 sur fin
     struct sigaction sigusr2Action;
     sigusr2Action.sa_handler = fin;
@@ -191,15 +203,22 @@ static void init( )
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-void Entree( int balID, int parkingID, int compteurVoituresID, int nombrePlacesOccupeesID,
-                int* requeteID, int semID, int numSemRequete, long type )
+void Entree( int balID, int parkingID, int immatriculationID, int nombrePlacesOccupeesID,
+                int requeteID, int semID, int numSemRequete, long type )
 {
+	// Init globaux privés
+	boiteID = balID;
+	parkID = parkingID;
+	immatID = immatriculationID;
+	nbPlacesID = nombrePlacesOccupeesID;
+	reqID = requeteID;
     semaphoreID = semID;
-    parkID = parkingID;
-    boiteID = balID;
-
+	numSemReq = numSemRequete;
+	
+	// Phase d'INITIALISATION
     init( );
 
+	// Phase MOTEUR
     moteur( type );
 
 	// TODO :	phase moteur

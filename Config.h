@@ -37,8 +37,9 @@
 #define REQ_BP_AUTRES 2
 
 #define MSG_TYPE_ENTREE_GB 1
-#define MSG_TYPE_ENTREE_BP 2
-#define MSG_TYPE_SORTIE 3
+#define MSG_TYPE_ENTREE_BP_PROFS 2
+#define MSG_TYPE_ENTREE_BP_AUTRES 3
+#define MSG_TYPE_SORTIE 4
 
 #define SEM_PARKING 0
 #define SEM_COMPTEUR 1
@@ -52,8 +53,9 @@
 struct voiture
 // INFORMATIONS sur le type :
 //	1:	Entrée GB
-//	2:	Entrée BP
-//	3:	Sortie
+//	2:	Entrée BP Profs
+//	3:	Entrée BP Autres
+//	4:	Sortie
 {
 	long type;
 	unsigned int numVoiture;

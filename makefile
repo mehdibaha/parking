@@ -4,12 +4,12 @@ RM = rm
 EXE = parking
 CLEAN = clean
 CPPFLAGS = -std=c++11 -c -Wall -Wextra
-LIBSPATH = -L/share/public/tp/tp-multitache
-INTPATH = -I/share/public/tp/tp-multitache
+LIBSPATH = -Ltp-multitache
+INTPATH = -Itp-multitache
 RMFLAGS = -f
 EDLFLAGS = -std=c++11
 LIBS = -ltp -lncurses -ltcl
-INTERFACE = Mere.h Clavier.h
+INTERFACE = Mere.h Clavier.h Entree.h Sortie.h
 REAL = $(INTERFACE:.h=.cpp)
 OBJ = $(INTERFACE:.h=.o)
 

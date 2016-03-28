@@ -71,7 +71,6 @@ int main ( int argc, char ** argv )
 	
 	// Mémoire partagée
 	int parkingID = shmget( ftok(argv[0], 'p'), NB_PLACES_PARKING*sizeof(struct placeParking), IPC_CREAT | 600 );
-	int compteurVoituresID = shmget( IPC_PRIVATE, sizeof(unsigned int), IPC_CREAT | 600 );
 	int nombrePlacesOccupeesID = shmget( IPC_PRIVATE, sizeof(unsigned int), IPC_CREAT | 600 );
 	int immatriculationID = shmget( IPC_PRIVATE, sizeof(unsigned int), IPC_CREAT | 600 );
 	int requetesID[NB_REQUETES];
@@ -97,17 +96,17 @@ int main ( int argc, char ** argv )
 	
 	temps = ActiverHeure( );
 	
-    /*if( ( entreeGB = fork( ) ) == 0 )
+    if( ( entreeGB = fork( ) ) == 0 )
     {
-        Entree( parkingID, compteurVoituresID, nombrePlacesOccupeesID, requeteID[REQ_GB], semID, SEM_REQUETE_GB );
+        Entree( balID, parkingID, immatriculationID, nombrePlacesOccupeesID, requetesID[REQ_GB], semID, SEM_REQUETE_GB, MSG_TYPE_ENTREE_GB );
     }
 	else if( ( entreeProfsBP = fork( ) ) == 0 )
 	{
-		Entree( parkingID, compteurVoituresID, nombrePlacesOccupeesID, requeteID[REQ_BP_PROFS], semID, SEM_REQUETE_BP_PROFS );
+		Entree( balID, parkingID, immatriculationID, nombrePlacesOccupeesID, requetesID[REQ_BP_PROFS], semID, SEM_REQUETE_BP_PROFS, MSG_TYPE_ENTREE_BP_PROFS );
 	}
 	else if( ( entreeAutresBP = fork( ) ) == 0 )
 	{
-		Entree( parkingID, compteurVoituresID, nombrePlacesOccupeesID, requeteID[REQ_BP_AUTRES], semID, SEM_REQUETE_BP_AUTRES );
+		Entree( balID, parkingID, immatriculationID, nombrePlacesOccupeesID, requetesID[REQ_BP_AUTRES], semID, SEM_REQUETE_BP_AUTRES, MSG_TYPE_ENTREE_BP_AUTRES );
 	}
 	else if( ( sortie = fork( ) ) == 0 )
 	{
@@ -118,7 +117,7 @@ int main ( int argc, char ** argv )
 		
 		Sortie( parkingID, balID, nombrePlacesOccupeesID, requetesID, semID, entreesID );
 	}
-    else */if( ( clavier = fork( ) ) == 0 )
+    else if( ( clavier = fork( ) ) == 0 )
 	{
 		Clavier( balID );
 	}
@@ -129,21 +128,21 @@ int main ( int argc, char ** argv )
 		
 		// DESTRUCTION
 		// TODO :	faire une fonction de destruction
-		/*kill( sortie, SIGUSR2 );
+		kill( sortie, SIGUSR2 );
 		waitpid( sortie, NULL, 0 );
 		kill( entreeAutresBP, SIGUSR2 );
 		waitpid( entreeAutresBP, NULL, 0 );
 		kill( entreeProfsBP, SIGUSR2 );
 		waitpid( entreeProfsBP, NULL, 0 );
 		kill( entreeGB, SIGUSR2 );
-		waitpid( entreeGB, NULL, 0 );*/
+		waitpid( entreeGB, NULL, 0 );
 		kill( temps, SIGUSR2 );
 		waitpid( temps, NULL, 0 );
 		
 		msgctl( balID, IPC_RMID, NULL );
 		shmctl( parkingID, IPC_RMID, NULL );
-		shmctl( compteurVoituresID, IPC_RMID, NULL );
 		shmctl( nombrePlacesOccupeesID, IPC_RMID, NULL );
+		shmctl( immatriculationID, IPC_RMID, NULL );
 		for( int i = 0; i<NB_REQUETES; i++ )
 		{
 			shmctl( requetesID[i], IPC_RMID, NULL );
