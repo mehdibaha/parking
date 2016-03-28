@@ -12,6 +12,7 @@
 //-------------------------------------------------------- Include système
 #include <stdlib.h>
 #include <ctime>
+#include <sys/msg.h>
 
 //------------------------------------------------------ Include personnel
 #include "Clavier.h"
@@ -29,6 +30,7 @@ typedef enum TypeUsager TypeUsager;
 
 //---------------------------------------------------- Variables statiques
 static int compteurVoiture = 0;
+static int boiteID;
 
 //------------------------------------------------------ Fonctions privées
 static Voiture creerVoiture ( TypeUsager typeUsager, long typeEntree )
@@ -38,7 +40,6 @@ static Voiture creerVoiture ( TypeUsager typeUsager, long typeEntree )
 	Voiture voiture;
 	voiture.usager = typeUsager;
 	voiture.heureArrive = time(NULL);
-	voiture.type = typeEntree;
 	compteurVoiture++;
 	voiture.numVoiture = compteurVoiture % (NB_VOITURES_MAX + 1);
 	return voiture;
@@ -48,6 +49,8 @@ static Voiture creerVoiture ( TypeUsager typeUsager, long typeEntree )
 //---------------------------------------------------- Fonctions publiques
 void Clavier ( int balID )
 {
+	boiteID = balID;
+	
     for (;;)
     {
         Menu ( );
@@ -67,7 +70,8 @@ void Commande ( char code, unsigned int valeur )
 		case 'P':
 		case 'p':
 			voiture = creerVoiture(TypeUsager::PROF, valeur);
-			// TODO :	déposer un message dans la boite associée
+			voiture.type = valeur == 1 ? MSG_TYPE_ENTREE_BP_PROFS : MSG_TYPE_ENTREE_GB;
+			msgsnd( boiteID, &voiture, sizeof(Voiture)-sizeof(long), NULL );
 			// NB :	une seule boite mais plusieurs files, suffit de mettre la bonne valeur de
 			//		long type (voir config .h, dans les #define)
 		case 'A':
