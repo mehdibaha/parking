@@ -265,23 +265,12 @@ void Sortie( int parkingID, int balID, int nombrePlacesOccupeesID, int* requetes
 		struct voiture message;
 		while( msgrcv( balID, (void*) &message, sizeof(struct voiture)-sizeof(long), MSG_TYPE_SORTIE, NULL ) == -1 && errno == EINTR );
 		
-		log << "Un voiture veut sortir ! C'est la numero : " << message.numVoiture << endl;
+		log << "Un voiture veut sortir ! Elle était à la place : " << message.numPlace << endl;
 		// Lancer la tache qui va faire sortir la voiture
 		unsigned int i;
 		unsigned int numPlace = 0;
-		log << "Regardons si elle est là..." << endl;
-		for(i = 0; i< NB_PLACES_PARKING; i++)
-		{
-			// TODO : semaphore ?
-			log << "Place " << i+1 << " : voiture numero " << parking[i].numVoiture << endl;
-			if( parking[i].numVoiture == message.numVoiture )
-			{
-				numPlace = i+1;
-				log << "On la connait ! Elle etait a la place " << numPlace << endl;
-				break;
-			}
-		}
-		pid_t voiturier = SortirVoiture( numPlace );
+		
+		pid_t voiturier = SortirVoiture( message.numPlace );
 		if( voiturier != -1 )
 		{
 			listeFils.push_back(voiturier);

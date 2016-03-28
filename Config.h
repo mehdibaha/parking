@@ -60,6 +60,7 @@ struct voiture
 //	4:	Sortie
 {
 	long type;
+	unsigned int numPlace;
 	unsigned int numVoiture;
 	enum TypeUsager usager;
 	time_t heureArrive;			// TODO : c'est pas forcément l'heure d'arrivée, pour la sortie c'est l'heure de départ

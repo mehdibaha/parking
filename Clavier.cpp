@@ -33,15 +33,25 @@ static int compteurVoiture = 0;
 static int boiteID;
 
 //------------------------------------------------------ Fonctions privées
-static Voiture creerVoiture ( TypeUsager typeUsager, long typeEntree )
+static Voiture creerVoiture ( TypeUsager typeUsager, long valeur, bool entree )
 // Mode d'emploi :
 // Construit et initialise une structure de type Voiture
+// TODO : expliquer la semantique differente de valeur, et p-e renommer
 {
 	Voiture voiture;
 	voiture.usager = typeUsager;
 	voiture.heureArrive = time(NULL);
-	compteurVoiture++;
-	voiture.numVoiture = compteurVoiture % (NB_VOITURES_MAX + 1);
+	if(entree)
+	{
+		compteurVoiture++;
+		voiture.numPlace = 0;
+		voiture.numVoiture = compteurVoiture % (NB_VOITURES_MAX + 1);
+	}
+	else
+	{
+		voiture.numPlace = valeur;
+		voiture.numVoiture = 0;
+	}
 	return voiture;
 } //----- fin de creerVoiture
 
@@ -69,7 +79,7 @@ void Commande ( char code, unsigned int valeur )
 			exit( 0 );
 		case 'P':
 		case 'p':
-			voiture = creerVoiture(TypeUsager::PROF, valeur);
+			voiture = creerVoiture(TypeUsager::PROF, valeur, true);
 			voiture.type = valeur == 1 ? MSG_TYPE_ENTREE_BP_PROFS : MSG_TYPE_ENTREE_GB;
 			msgsnd( boiteID, &voiture, sizeof(Voiture)-sizeof(long), NULL );
 			break;
@@ -77,13 +87,13 @@ void Commande ( char code, unsigned int valeur )
 			//		long type (voir config .h, dans les #define)
 		case 'A':
 		case 'a':
-			voiture = creerVoiture(TypeUsager::AUTRE, valeur);
+			voiture = creerVoiture(TypeUsager::AUTRE, valeur, true);
 			voiture.type = valeur == 1 ? MSG_TYPE_ENTREE_BP_AUTRES : MSG_TYPE_ENTREE_GB;
 			msgsnd( boiteID, &voiture, sizeof(Voiture)-sizeof(long), NULL );
 			break;
 		case 'S':
 		case 's':
-			voiture = creerVoiture(TypeUsager::AUCUN, valeur);
+			voiture = creerVoiture(TypeUsager::AUTRE, valeur, false);
 			voiture.type = MSG_TYPE_SORTIE;
 			msgsnd( boiteID, &voiture, sizeof(Voiture)-sizeof(long), NULL );
 			break;
