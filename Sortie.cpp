@@ -10,6 +10,7 @@
 
 /////////////////////////////////////////////////////////////////  INCLUDE
 //-------------------------------------------------------- Include système
+using namespace std;
 #include <cstdlib>
 #include <errno.h>
 #include <sys/msg.h>
@@ -18,6 +19,9 @@
 #include <sys/sem.h>
 #include <list>
 #include <ctime>
+
+// Debug
+#include <fstream>
 
 //------------------------------------------------------ Include personnel
 #include "Sortie.h"
@@ -43,9 +47,12 @@ static pid_t* entreesPID;
 
 static struct placeParking* parking;
 static int* nbPlaces;
-struct requeteEntree* requeteEGB;
-struct requeteEntree* requeteEBP_profs;
-struct requeteEntree* requeteEGB_autres;
+static struct requeteEntree* requeteEGB;
+static struct requeteEntree* requeteEBP_profs;
+static struct requeteEntree* requeteEGB_autres;
+
+// Debug
+ofstream log;
 
 //------------------------------------------------------ Fonctions privées
 static void fin ( int noSignal )
@@ -56,6 +63,9 @@ static void fin ( int noSignal )
 // Algorithme :
 //
 {
+	log << "On a recu le signal de fin" << endl;
+	log.close();
+	
 	sigaction( SIGCHLD, NULL, NULL );
 	shmdt( nbPlaces );
 	shmdt( parking );
@@ -83,6 +93,7 @@ static void mortFils ( int noSignal )
 // Algorithme :
 //
 {
+	log << "Un fils est mort" << endl;
 	// Prises des informations liées à la mort du fils
 	int statut;
 	pid_t pidFils = waitpid( -1, &statut, WNOHANG );
@@ -215,6 +226,7 @@ void Sortie( int parkingID, int balID, int nombrePlacesOccupeesID, int* requetes
 // Algorithme :
 //
 {
+	log.open("sortie.log");
 	// INITIALISATION
 	// Mise à jour des variables globales
 	parkID = parkingID;
@@ -243,13 +255,16 @@ void Sortie( int parkingID, int balID, int nombrePlacesOccupeesID, int* requetes
 	sigchldAction.sa_flags = 0;
 	sigaction( SIGCHLD, &sigchldAction, NULL );
 	
+	log << "INIT reussie" << endl;
 	// MOTEUR
 	for( ;; )
 	{
+		log << "Attente qu'une voiture sorte (INFINITE LOOP)..." << endl;
 		// Attendre devant la boite aux lettres
 		struct voiture message;
 		while( msgrcv( balID, (void*) &message, sizeof(struct voiture)-sizeof(long), MSG_TYPE_SORTIE, NULL ) == -1 && errno == EINTR );
 		
+		log << "Un voiture veut sortir ! C'est la numero : " << message.numVoiture << endl;
 		// Lancer la tache qui va faire sortir la voiture
 		unsigned int i;
 		unsigned int numPlace = 0;
@@ -259,6 +274,7 @@ void Sortie( int parkingID, int balID, int nombrePlacesOccupeesID, int* requetes
 			if( parking[i].numVoiture == message.numVoiture )
 			{
 				numPlace = i+1;
+				log << "On la connait ! Elle etait a la place " << numPLace << endl;
 				break;
 			}
 		}
