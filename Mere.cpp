@@ -87,7 +87,14 @@ int main ( int argc, char ** argv )
 	
 	// Sémaphores
 	int semID = semget( IPC_PRIVATE, NB_SEGMENTS_A_PROTEGER, IPC_CREAT | DROITS_ACCES );
-	semctl( semID, NB_SEGMENTS_A_PROTEGER, SETALL, 1 );
+	union semun args;
+	unsigned short val[NB_SEGMENTS_A_PROTEGER];
+	for(unsigned int i =0; i< NB_SEGMENTS_A_PROTEGER; i++)
+	{
+		val[i] = 1;
+	}
+	args.array = val;
+	semctl( semID, NB_SEGMENTS_A_PROTEGER, SETALL, args );
 	
 	// Mise en place de l'environnement fourni
 	InitialiserApplication ( XTERM );

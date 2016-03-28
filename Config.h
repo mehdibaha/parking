@@ -80,6 +80,15 @@ struct requeteEntree
 	time_t heureArrive;
 };
 
+// NB : homemade, since the system can't find it...
+union semun {
+	 int val;                  /* value for SETVAL */
+	 struct semid_ds *buf;     /* buffer for IPC_STAT, IPC_SET */
+	 unsigned short *array;    /* array for GETALL, SETALL */
+							   /* Linux specific part: */
+	 struct seminfo *__buf;    /* buffer for IPC_INFO */
+};
+
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 TypeZone ConvertZone(int numPlace);

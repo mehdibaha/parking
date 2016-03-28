@@ -128,9 +128,10 @@ static void mortFils ( int noSignal )
         semOp.sem_flg = NULL;
 		
 		log << "SemBuf init... Demande maj parking" << endl;
-
+		log << "Le sémaphore a une valeur de " << semctl(semaphoreID, SEM_PARKING, GETVAL, NULL) << endl;
         // Mise à jour des places de parking
         while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
+			log << "Succes réservation ? errno vaut : " << errno << endl;
 			parking[numPlace-1].heureArrive = heureEntree;
 			parking[numPlace-1].numVoiture = v.numVoiture;
 			parking[numPlace-1].usager = v.usager;
