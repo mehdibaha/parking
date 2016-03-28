@@ -126,6 +126,12 @@ static void mortFils ( int noSignal )
 			//		mais cela ne devrait pas mener à un interblocage.
 			semOp.sem_op = 1;
 		semop( semaphoreID, &semOp, 1 );
+
+        // Mise à jour de l'affichage du parking
+        semop( semaphoreID, &semOp, 1 );
+        Afficher(ConvertZone(numPlace), "LEAVING");
+        semOp.sem_op = 1;
+        semop( semaphoreID, &semOp, 1 );
 		
 		// Mise à jour des places de parking
 		semOp.sem_op = -1;

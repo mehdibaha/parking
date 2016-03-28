@@ -129,20 +129,32 @@ static void mortFils ( int noSignal )
 
         // Mise à jour des places de parking
         semop( semaphoreID, &semOp, 1 );
-        parking[numPlace-1].heureArrive = heureEntree;
-        parking[numPlace-1].numVoiture = v.numVoiture;
-        parking[numPlace-1].usager = v.usager;
-        // nbPlaces++;		TODO : WOWOWO c'est un pointeur ça, tu déplaces la mémoire là !!! Et c'est un autre sem pour le protéger
+			parking[numPlace-1].heureArrive = heureEntree;
+			parking[numPlace-1].numVoiture = v.numVoiture;
+			parking[numPlace-1].usager = v.usager;
         semOp.sem_op = 1;
         semop( semaphoreID, &semOp, 1 );
 
+		// Mise à jour de l'affichage de l'entrée
+		semOp.sem_op = -1;
+		semop( semaphoreID, &semOp, 1 );
+			AfficherPlace(v.numVoiture, v.usager, v.heureArrive, heureEntree);
+			Afficher(ConvertZone(numPlace), "ENTERING");
+		semOp.sem_op = 1;
+		semop( semaphoreID, &semOp, 1 );
 
-        // Mise à jour de l'affichage de l'entrée
-        semOp.sem_op = -1;
-        semop( semaphoreID, &semOp, 1 );
-        AfficherPlace(v.numVoiture, v.usager, v.heureArrive, heureEntree);
-        semOp.sem_op = 1;
-        semop( semaphoreID, &semOp, 1 );
+		// Mise à jour de l'affichage du parking
+		semOp.sem_op = -1;
+		semop( semaphoreID, &semOp, 1 );
+		Afficher(ConvertZone(numPlace), "ENTERING");
+		semOp.sem_op = 1;
+		semop( semaphoreID, &semOp, 1 );
+
+		semOp.sem_num = SEM_NB_PLACES_OCCUPEES;
+		semop( semaphoreID, &semOp, 1 );
+			(*nbPlaces)++; // TODO C'est bien là ?
+		semOp.sem_op = 1;
+		semop( semaphoreID, &semOp, 1 );
 
         voitureMap.erase( itr );
     }

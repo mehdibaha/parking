@@ -82,10 +82,8 @@ struct requeteEntree
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-// type Nom ( liste de paramètres );
+TypeZone ConvertZone(int numPlace);
 // Mode d'emploi :
-//
-// Contrat :
 //
 
 #endif // CONFIG_H
