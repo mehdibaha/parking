@@ -110,6 +110,8 @@ static void mortFils ( int noSignal )
     // Si ce fils existait bel et bien, on le supprime et on fait les traitements associés
     if( itr != voitureMap.end( ) )
     {
+		log << "Ce fils était connu" << endl;
+		log << "Il a garé la voiture à la place " << numPlace << endl;
         Voiture v = itr->second;
 
         // Init sembuf
@@ -119,12 +121,11 @@ static void mortFils ( int noSignal )
         semOp.sem_flg = NULL;
 
         // Mise à jour des places de parking
-        semOp.sem_op = -1;
         semop( semaphoreID, &semOp, 1 );
-        parking[numPlace].heureArrive = heureEntree;
-        parking[numPlace].numVoiture = v.numVoiture ;
-        parking[numPlace].usager = v.usager ;
-        nbPlaces++;
+        parking[numPlace-1].heureArrive = heureEntree;
+        parking[numPlace-1].numVoiture = v.numVoiture;
+        parking[numPlace-1].usager = v.usager;
+        // nbPlaces++;		TODO : WOWOWO c'est un pointeur ça, tu déplaces la mémoire là !!! Et c'est un autre sem pour le protéger
         semOp.sem_op = 1;
         semop( semaphoreID, &semOp, 1 );
 

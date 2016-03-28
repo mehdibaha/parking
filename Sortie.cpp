@@ -109,17 +109,17 @@ static void mortFils ( int noSignal )
 		
 		// Mise à jour de l'affichage de la sortie
 		semop( semaphoreID, &semOp, 1 );
-		AfficherSortie( parking[numPlace].usager, parking[numPlace].numVoiture, parking[numPlace].heureArrive, heureDepart );
-		// NB : on dispose d'une ressource et on en demande une autre via AfficherSortie,
-		//		mais cela ne devrait pas mener à un interblocage.
-		semOp.sem_op = 1;
+			AfficherSortie( parking[numPlace-1].usager, parking[numPlace-1].numVoiture, parking[numPlace-1].heureArrive, heureDepart );
+			// NB : on dispose d'une ressource et on en demande une autre via AfficherSortie,
+			//		mais cela ne devrait pas mener à un interblocage.
+			semOp.sem_op = 1;
 		semop( semaphoreID, &semOp, 1 );
 		
 		// Mise à jour des places de parking
 		semOp.sem_op = -1;
 		semop( semaphoreID, &semOp, 1 );
-		parking[numPlace].usager = AUCUN;
-		semOp.sem_op = 1;
+			parking[numPlace-1].usager = AUCUN;
+			semOp.sem_op = 1;
 		semop( semaphoreID, &semOp, 1 );
 		
 		// Mise à jour du nombre de voitures
@@ -258,7 +258,8 @@ void Sortie( int parkingID, int balID, int nombrePlacesOccupeesID, int* requetes
 			// TODO : semaphore ?
 			if( parking[i].numVoiture == message.numVoiture )
 			{
-				numPlace = parking[i].numPlace;
+				numPlace = i+1;
+				break;
 			}
 		}
 		pid_t voiturier = SortirVoiture( numPlace );
