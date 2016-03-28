@@ -12,6 +12,7 @@
 //-------------------------------------------------------- Include système
 #include <cstdlib>
 #include <errno.h>
+#include <signal.h>
 #include <sys/msg.h>
 #include <sys/shm.h>
 #include <sys/wait.h>
