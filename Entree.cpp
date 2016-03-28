@@ -176,7 +176,7 @@ static void moteur( long type )
 				case MSG_TYPE_ENTREE_BP_PROFS:
 					typeBarriere = PROF_BLAISE_PASCAL;
 					break;
-				case MSG_TYPE_ENTREE_BP_AUTRES;
+				case MSG_TYPE_ENTREE_BP_AUTRES:
 					typeBarriere = AUTRE_BLAISE_PASCAL;
 					break;
 				default:
