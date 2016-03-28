@@ -13,6 +13,7 @@
 using namespace std;
 #include <map>
 #include <cstdlib>
+#include <signal.h>
 #include <errno.h>
 #include <sys/msg.h>
 #include <sys/shm.h>
