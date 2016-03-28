@@ -21,6 +21,9 @@ using namespace std;
 #include <list>
 #include <ctime>
 
+// Debug
+#include <fstream>
+
 //------------------------------------------------------ Include personnel
 #include "Entree.h"
 #include "Config.h"
@@ -50,6 +53,9 @@ struct requeteEntree* req;
 
 static map<pid_t,Voiture> voitureMap;
 
+// Debug
+ofstream log;
+
 //------------------------------------------------------ Fonctions privées
 // TODO :	Lorsque Entree est coincée parcequ'il n'y a plus de places dans le parking,
 //			c'est sortie qui la débloque en lui envoyant un signal SIGUSR1.
@@ -61,6 +67,7 @@ static void fin ( int noSignal )
 // Mode d'emploi :
 //
 {
+	log << "On a recu le signal de fin" << endl;
     sigaction( SIGCHLD, NULL, NULL );
 	
 	shmdt( parking );
@@ -90,9 +97,11 @@ static void mortFils ( int noSignal )
 //			Pas besoin d'envoyer un signal
 // TODO FAIT ?
 {
+	log << "Un fils est mort : ";
     // Prises des informations liées à la mort du fils
     int statut;
     pid_t pidFils = waitpid( -1, &statut, WNOHANG );
+	log << pidFils << endl;
     int numPlace = WEXITSTATUS(statut);
     time_t heureEntree = time( NULL );
 
@@ -136,16 +145,22 @@ static void moteur( long type )
 // Mode d'emploi :
 //
 {
+	log << "Phase MOTEUR..." << endl;
     Voiture message;
+	log << "Struct voiture cree" << endl;
 
 	for( ;; )
 	{
+		log << "In INIFINITE LOOP - waiting for a car to arrive" << endl;
 		while( msgrcv( boiteID, (void*) &message, sizeof(struct voiture)-sizeof(long), type, NULL ) == -1 && errno == EINTR );
 
 		// Lancer la tâche qui va faire rentrer la voiture
 		// TODO : heu, lecture d'une MP ligne en dessous... mutex ?
+		
+		
 		if (*nbPlaces < NB_PLACES_PARKING)
 		{
+			log << "Il y a de la place" << endl;
 			RequeteEntree requete;
 			requete.numVoiture = voitureMap.size(); // CHOIX DE NUMEROTATION
 			requete.usager = message.usager;
@@ -163,18 +178,29 @@ static void moteur( long type )
 				else
 					typeBarriere = AUTRE_BLAISE_PASCAL;
 			}
+			
+			log << "On dessine la voiture" << endl;
 
 			DessinerVoitureBarriere(typeBarriere, message.usager);
+			
+			log << "Voiture dessinée" << endl;
 
 			AfficherRequete(typeBarriere, message.usager, requete.heureArrive);
+			
+			log << "Requete affichée" << endl;
 
 			pid_t pidCourant = GarerVoiture(typeBarriere);
 			if (pidCourant != -1)
 			{
 				voitureMap.insert(make_pair(pidCourant, message));
 			}
+			
+			log << "On a crée une tache pour garer la voiture : " << pidCourant << endl;
 		}
+		
+		log << "Il n'y avait pas de place"  << endl;
 	}
+	log << "On est sorti de la boucle infinie !! :o"  << endl;
 } //----- fin de moteur
 
 static void init( )
@@ -209,6 +235,8 @@ static void init( )
 void Entree( int balID, int parkingID, int immatriculationID, int nombrePlacesOccupeesID,
                 int requeteID, int semID, int numSemRequete, long type )
 {
+	log.open("entree.log");
+	
 	// Init globaux privés
 	boiteID = balID;
 	parkID = parkingID;
@@ -218,8 +246,14 @@ void Entree( int balID, int parkingID, int immatriculationID, int nombrePlacesOc
     semaphoreID = semID;
 	numSemReq = numSemRequete;
 	
+	log << "INIT globaux OK" << endl;
+	
+	
+	
 	// Phase d'INITIALISATION
     init( );
+	
+	log << "Phase INIT OK" << endl;
 
 	// Phase MOTEUR
     moteur( type );

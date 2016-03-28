@@ -16,7 +16,7 @@ then
 	echo "IPCS match"
 else
 	echo "IPCS don't match :"
-	cat ipcs.diff
+	cat tracker/ipcs.diff
 fi
 
 diff tracker/ps.new tracker/ps.old >tracker/ps.diff
@@ -25,5 +25,5 @@ then
 	echo "PS match"
 else
 	echo "PS don't match"
-	cat ps.diff
+	cat tracker/ps.diff
 fi

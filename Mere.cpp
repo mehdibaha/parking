@@ -64,23 +64,23 @@ int main ( int argc, char ** argv )
 	sigaction( SIGINT, &sigintAction, NULL );
 	
 	// Boites aux lettres
-	int balID = msgget( ftok(argv[0], 'm'), IPC_CREAT | 600 );
+	int balID = msgget( ftok(argv[0], 'm'), IPC_CREAT | DROITS_ACCES );
 		// NB :	une seule file de message.
 		//		Le clavier deposera seulement un message de type différent pour le comportement à simuler.
 		//		Les tâches d'entrées/sortie n'attendront qu'un seul type de message.
 	
 	// Mémoire partagée
-	int parkingID = shmget( ftok(argv[0], 'p'), NB_PLACES_PARKING*sizeof(struct placeParking), IPC_CREAT | 600 );
-	int nombrePlacesOccupeesID = shmget( IPC_PRIVATE, sizeof(unsigned int), IPC_CREAT | 600 );
-	int immatriculationID = shmget( IPC_PRIVATE, sizeof(unsigned int), IPC_CREAT | 600 );
+	int parkingID = shmget( ftok(argv[0], 'p'), NB_PLACES_PARKING*sizeof(struct placeParking), IPC_CREAT | DROITS_ACCES );
+	int nombrePlacesOccupeesID = shmget( IPC_PRIVATE, sizeof(unsigned int), IPC_CREAT | DROITS_ACCES );
+	int immatriculationID = shmget( IPC_PRIVATE, sizeof(unsigned int), IPC_CREAT | DROITS_ACCES );
 	int requetesID[NB_REQUETES];
 	for( int i = 0; i<NB_REQUETES; i++ )
 	{
-		requetesID[i] = shmget( IPC_PRIVATE, sizeof(struct requeteEntree), IPC_CREAT | 600 );
+		requetesID[i] = shmget( IPC_PRIVATE, sizeof(struct requeteEntree), IPC_CREAT | DROITS_ACCES );
 	}
 	
 	// Sémaphores
-	int semID = semget( IPC_PRIVATE, NB_SEGMENTS_A_PROTEGER, IPC_CREAT | 600 );
+	int semID = semget( IPC_PRIVATE, NB_SEGMENTS_A_PROTEGER, IPC_CREAT | DROITS_ACCES );
 	semctl( semID, NB_SEGMENTS_A_PROTEGER, SETALL, 1 );
 	
 	// Mise en place de l'environnement fourni
@@ -100,7 +100,7 @@ int main ( int argc, char ** argv )
     {
         Entree( balID, parkingID, immatriculationID, nombrePlacesOccupeesID, requetesID[REQ_GB], semID, SEM_REQUETE_GB, MSG_TYPE_ENTREE_GB );
     }
-	else if( ( entreeProfsBP = fork( ) ) == 0 )
+	/*else if( ( entreeProfsBP = fork( ) ) == 0 )
 	{
 		Entree( balID, parkingID, immatriculationID, nombrePlacesOccupeesID, requetesID[REQ_BP_PROFS], semID, SEM_REQUETE_BP_PROFS, MSG_TYPE_ENTREE_BP_PROFS );
 	}
@@ -116,7 +116,7 @@ int main ( int argc, char ** argv )
 		entreesID[NUM_PID_ENTREE_BP_AUTRES] = entreeAutresBP;
 		
 		Sortie( parkingID, balID, nombrePlacesOccupeesID, requetesID, semID, entreesID );
-	}
+	}*/
     else if( ( clavier = fork( ) ) == 0 )
 	{
 		Clavier( balID );
@@ -128,12 +128,12 @@ int main ( int argc, char ** argv )
 		
 		// DESTRUCTION
 		// TODO :	faire une fonction de destruction
-		kill( sortie, SIGUSR2 );
+		/*kill( sortie, SIGUSR2 );
 		waitpid( sortie, NULL, 0 );
 		kill( entreeAutresBP, SIGUSR2 );
 		waitpid( entreeAutresBP, NULL, 0 );
 		kill( entreeProfsBP, SIGUSR2 );
-		waitpid( entreeProfsBP, NULL, 0 );
+		waitpid( entreeProfsBP, NULL, 0 );*/
 		kill( entreeGB, SIGUSR2 );
 		waitpid( entreeGB, NULL, 0 );
 		kill( temps, SIGUSR2 );
