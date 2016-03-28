@@ -68,6 +68,7 @@ static void fin ( int noSignal )
 //
 {
 	log << "On a recu le signal de fin" << endl;
+	log.close();
     sigaction( SIGCHLD, NULL, NULL );
 	
 	shmdt( parking );
