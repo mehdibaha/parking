@@ -79,6 +79,12 @@ int main ( int argc, char ** argv )
 		requetesID[i] = shmget( IPC_PRIVATE, sizeof(struct requeteEntree), IPC_CREAT | DROITS_ACCES );
 	}
 	
+	int* nbPlaces = (int*) shmat( nombrePlacesOccupeesID, NULL, SHM_R|SHM_W );
+	*nbPlaces = 0;
+	shmdt( nbPlaces );
+	
+	// TODO : init les segments de MP qui ont besoin de l'être
+	
 	// Sémaphores
 	int semID = semget( IPC_PRIVATE, NB_SEGMENTS_A_PROTEGER, IPC_CREAT | DROITS_ACCES );
 	semctl( semID, NB_SEGMENTS_A_PROTEGER, SETALL, 1 );

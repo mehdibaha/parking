@@ -49,7 +49,7 @@
 #define SEM_REQUETE_BP_AUTRES 5
 #define SEM_IMMATRICULATION 6
 
-#define DROITS_ACCES 777
+#define DROITS_ACCES 0777
 
 //------------------------------------------------------------------ Types
 struct voiture

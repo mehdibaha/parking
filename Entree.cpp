@@ -154,10 +154,10 @@ static void moteur( long type )
 		log << "In INIFINITE LOOP - waiting for a car to arrive" << endl;
 		while( msgrcv( boiteID, (void*) &message, sizeof(struct voiture)-sizeof(long), type, NULL ) == -1 && errno == EINTR );
 
+		log << "Une voiture est arrivée" << endl;
+		log << "Il y a " << *nbPlaces << " places occupees" << endl;
 		// Lancer la tâche qui va faire rentrer la voiture
 		// TODO : heu, lecture d'une MP ligne en dessous... mutex ?
-		
-		
 		if (*nbPlaces < NB_PLACES_PARKING)
 		{
 			log << "Il y a de la place" << endl;
@@ -212,6 +212,7 @@ static void init( )
     nbPlaces = (int*) shmat( nbPlacesID, NULL, NULL );
     req = (requeteEntree*) shmat( reqID, NULL, NULL );
 	immatriculation = (int*) shmat( immatID, NULL, NULL );
+	
 
 	// TODO: Handle SIGUSR1
 	
