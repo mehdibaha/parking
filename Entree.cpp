@@ -54,7 +54,7 @@ struct requeteEntree* req;
 static map<pid_t,Voiture> voitureMap;
 
 // Debug
-ofstream log;
+static ofstream log;
 
 //------------------------------------------------------ Fonctions privées
 // TODO :	Lorsque Entree est coincée parcequ'il n'y a plus de places dans le parking,

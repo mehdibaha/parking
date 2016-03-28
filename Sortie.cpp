@@ -52,7 +52,7 @@ static struct requeteEntree* requeteEBP_profs;
 static struct requeteEntree* requeteEGB_autres;
 
 // Debug
-ofstream log;
+static ofstream log;
 
 //------------------------------------------------------ Fonctions privées
 static void fin ( int noSignal )
@@ -274,7 +274,7 @@ void Sortie( int parkingID, int balID, int nombrePlacesOccupeesID, int* requetes
 			if( parking[i].numVoiture == message.numVoiture )
 			{
 				numPlace = i+1;
-				log << "On la connait ! Elle etait a la place " << numPLace << endl;
+				log << "On la connait ! Elle etait a la place " << numPlace << endl;
 				break;
 			}
 		}
