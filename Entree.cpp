@@ -126,37 +126,37 @@ static void mortFils ( int noSignal )
         semOp.sem_num = SEM_PARKING;
         semOp.sem_op = -1;
         semOp.sem_flg = NULL;
+		
+		log << "SemBuf init... Demande maj parking" << endl;
 
         // Mise à jour des places de parking
-        semop( semaphoreID, &semOp, 1 );
+        while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
 			parking[numPlace-1].heureArrive = heureEntree;
 			parking[numPlace-1].numVoiture = v.numVoiture;
 			parking[numPlace-1].usager = v.usager;
-        semOp.sem_op = 1;
+			semOp.sem_op = 1;
         semop( semaphoreID, &semOp, 1 );
 
+		log << "Done. Maj affichage entree" << endl;
 		// Mise à jour de l'affichage de l'entrée
-		semOp.sem_op = -1;
-		semop( semaphoreID, &semOp, 1 );
-			AfficherPlace(v.numVoiture, v.usager, v.heureArrive, heureEntree);
-			Afficher(ConvertZone(numPlace), "ENTERING");
-		semOp.sem_op = 1;
-		semop( semaphoreID, &semOp, 1 );
-
-		// Mise à jour de l'affichage du parking
-		semOp.sem_op = -1;
-		semop( semaphoreID, &semOp, 1 );
+		AfficherPlace(v.numVoiture, v.usager, v.heureArrive, heureEntree);
 		Afficher(ConvertZone(numPlace), "ENTERING");
-		semOp.sem_op = 1;
-		semop( semaphoreID, &semOp, 1 );
 
+		log << "Done. Maj affichage parking" << endl;
+		// Mise à jour de l'affichage du parking
+		Afficher(ConvertZone(numPlace), "ENTERING");
+
+		semOp.sem_op = -1;
 		semOp.sem_num = SEM_NB_PLACES_OCCUPEES;
-		semop( semaphoreID, &semOp, 1 );
+		while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
 			(*nbPlaces)++; // TODO C'est bien là ?
-		semOp.sem_op = 1;
+			semOp.sem_op = 1;
 		semop( semaphoreID, &semOp, 1 );
 
         voitureMap.erase( itr );
+		
+		log << "Fin du handler se SIGCHLD..." << endl;
+		log << "Au passage, errno vaut : " << errno << endl;
     }
 
 } //----- fin de mortFils
