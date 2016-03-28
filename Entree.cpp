@@ -115,7 +115,12 @@ static void mortFils ( int noSignal )
 		log << "Ce fils était connu" << endl;
 		log << "Il a garé la voiture à la place " << numPlace << endl;
         Voiture v = itr->second;
-
+		
+		log << "Cette voiture :" << endl;
+		log << "-> Est arrivée à " << heureEntree << endl;
+		log << "-> A le numéro " << v.numVoiture << endl;
+		log << "-> Appartient à un usager de type " << v.usager << endl;
+		
         // Init sembuf
         struct sembuf semOp;
         semOp.sem_num = SEM_PARKING;

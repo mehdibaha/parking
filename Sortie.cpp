@@ -269,9 +269,11 @@ void Sortie( int parkingID, int balID, int nombrePlacesOccupeesID, int* requetes
 		// Lancer la tache qui va faire sortir la voiture
 		unsigned int i;
 		unsigned int numPlace = 0;
+		log << "Regardons si elle est là..." << endl;
 		for(i = 0; i< NB_PLACES_PARKING; i++)
 		{
 			// TODO : semaphore ?
+			log << "Place " << i+1 << " : voiture numero " << parking[i].numVoiture << endl;
 			if( parking[i].numVoiture == message.numVoiture )
 			{
 				numPlace = i+1;
