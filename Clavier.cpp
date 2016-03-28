@@ -72,16 +72,21 @@ void Commande ( char code, unsigned int valeur )
 			voiture = creerVoiture(TypeUsager::PROF, valeur);
 			voiture.type = valeur == 1 ? MSG_TYPE_ENTREE_BP_PROFS : MSG_TYPE_ENTREE_GB;
 			msgsnd( boiteID, &voiture, sizeof(Voiture)-sizeof(long), NULL );
+			break;
 			// NB :	une seule boite mais plusieurs files, suffit de mettre la bonne valeur de
 			//		long type (voir config .h, dans les #define)
 		case 'A':
 		case 'a':
 			voiture = creerVoiture(TypeUsager::AUTRE, valeur);
-			// TODO :	déposer un message dans la boite associée
+			voiture.type = valeur == 1 ? MSG_TYPE_ENTREE_BP_AUTRES : MSG_TYPE_ENTREE_GB;
+			msgsnd( boiteID, &voiture, sizeof(Voiture)-sizeof(long), NULL );
+			break;
 		case 'S':
 		case 's':
 			voiture = creerVoiture(TypeUsager::AUCUN, valeur);
-			// TODO :	déposer un message dans la boite associée
+			voiture.type = MSG_TYPE_SORTIE;
+			msgsnd( boiteID, &voiture, sizeof(Voiture)-sizeof(long), NULL );
+			break;
 		default:
 			break;
 	}
