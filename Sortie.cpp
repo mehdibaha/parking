@@ -244,25 +244,28 @@ void Sortie( int parkingID, int balID, int nombrePlacesOccupeesID, int* requetes
 	sigaction( SIGCHLD, &sigchldAction, NULL );
 	
 	// MOTEUR
-	// Attendre devant la boite aux lettres
-	struct voiture message;
-	while( msgrcv( balID, (void*) &message, sizeof(struct voiture)-sizeof(long), MSG_TYPE_SORTIE, NULL ) == -1 && errno == EINTR );
-	
-	// Lancer la tache qui va faire sortir la voiture
-	unsigned int i;
-	unsigned int numPlace = 0;
-	for(i = 0; i< NB_PLACES_PARKING; i++)
+	for( ;; )
 	{
-		// TODO : semaphore ?
-		if( parking[i].numVoiture == message.numVoiture )
+		// Attendre devant la boite aux lettres
+		struct voiture message;
+		while( msgrcv( balID, (void*) &message, sizeof(struct voiture)-sizeof(long), MSG_TYPE_SORTIE, NULL ) == -1 && errno == EINTR );
+		
+		// Lancer la tache qui va faire sortir la voiture
+		unsigned int i;
+		unsigned int numPlace = 0;
+		for(i = 0; i< NB_PLACES_PARKING; i++)
 		{
-			numPlace = parking[i].numPlace;
+			// TODO : semaphore ?
+			if( parking[i].numVoiture == message.numVoiture )
+			{
+				numPlace = parking[i].numPlace;
+			}
 		}
-	}
-	pid_t voiturier = SortirVoiture( numPlace );
-	if( voiturier != -1 )
-	{
-		listeFils.push_back(voiturier);
+		pid_t voiturier = SortirVoiture( numPlace );
+		if( voiturier != -1 )
+		{
+			listeFils.push_back(voiturier);
+		}
 	}
 	
 	// DESTRUCTION

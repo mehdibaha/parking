@@ -1,13 +1,13 @@
 # Before launch
 ipcs -a >tracker/ipcs.old
-ps -e >tracker/ps.old
+ps -a >tracker/ps.old
 
 # Launch
 ./parking
 
 # After launch
 ipcs -a >tracker/ipcs.new
-ps -e >tracker/ps.new
+ps -a >tracker/ps.new
 
 # Did we let something here ?
 diff tracker/ipcs.new tracker/ipcs.old >tracker/ipcs.diff

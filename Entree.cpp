@@ -138,40 +138,43 @@ static void moteur( long type )
 {
     Voiture message;
 
-    while( msgrcv( boiteID, (void*) &message, sizeof(struct voiture)-sizeof(long), type, NULL ) == -1 && errno == EINTR );
+	for( ;; )
+	{
+		while( msgrcv( boiteID, (void*) &message, sizeof(struct voiture)-sizeof(long), type, NULL ) == -1 && errno == EINTR );
 
-    // Lancer la tâche qui va faire rentrer la voiture
-	// TODO : heu, lecture d'une MP ligne en dessous... mutex ?
-    if (*nbPlaces < NB_PLACES_PARKING)
-    {
-        RequeteEntree requete;
-        requete.numVoiture = voitureMap.size(); // CHOIX DE NUMEROTATION
-        requete.usager = message.usager;
-        requete.heureArrive = time(NULL);
+		// Lancer la tâche qui va faire rentrer la voiture
+		// TODO : heu, lecture d'une MP ligne en dessous... mutex ?
+		if (*nbPlaces < NB_PLACES_PARKING)
+		{
+			RequeteEntree requete;
+			requete.numVoiture = voitureMap.size(); // CHOIX DE NUMEROTATION
+			requete.usager = message.usager;
+			requete.heureArrive = time(NULL);
 
-        TypeBarriere typeBarriere;
-        if (type == 1)
-        {
-            typeBarriere = ENTREE_GASTON_BERGER;
-        }
-        else if (type == 2)
-        {
-            if (message.usager == PROF)
-                typeBarriere = PROF_BLAISE_PASCAL;
-            else
-                typeBarriere = AUTRE_BLAISE_PASCAL;
-        }
+			TypeBarriere typeBarriere;
+			if (type == 1)
+			{
+				typeBarriere = ENTREE_GASTON_BERGER;
+			}
+			else if (type == 2)
+			{
+				if (message.usager == PROF)
+					typeBarriere = PROF_BLAISE_PASCAL;
+				else
+					typeBarriere = AUTRE_BLAISE_PASCAL;
+			}
 
-        DessinerVoitureBarriere(typeBarriere, message.usager);
+			DessinerVoitureBarriere(typeBarriere, message.usager);
 
-        AfficherRequete(typeBarriere, message.usager, requete.heureArrive);
+			AfficherRequete(typeBarriere, message.usager, requete.heureArrive);
 
-        pid_t pidCourant = GarerVoiture(typeBarriere);
-        if (pidCourant != -1)
-        {
-            voitureMap.insert(make_pair(pidCourant, message));
-        }
-    }
+			pid_t pidCourant = GarerVoiture(typeBarriere);
+			if (pidCourant != -1)
+			{
+				voitureMap.insert(make_pair(pidCourant, message));
+			}
+		}
+	}
 } //----- fin de moteur
 
 static void init( )
