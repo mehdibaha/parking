@@ -168,16 +168,21 @@ static void moteur( long type )
 			requete.heureArrive = time(NULL);
 
 			TypeBarriere typeBarriere;
-			if (type == 1)
+			switch(type)
 			{
-				typeBarriere = ENTREE_GASTON_BERGER;
-			}
-			else if (type == 2)
-			{
-				if (message.usager == PROF)
+				case MSG_TYPE_ENTREE_GB:
+					typeBarriere = ENTREE_GASTON_BERGER;
+					break;
+				case MSG_TYPE_ENTREE_BP_PROFS:
 					typeBarriere = PROF_BLAISE_PASCAL;
-				else
+					break;
+				case MSG_TYPE_ENTREE_BP_AUTRES;
 					typeBarriere = AUTRE_BLAISE_PASCAL;
+					break;
+				default:
+					typeBarriere = AUCUNE;
+					break;
+					
 			}
 			
 			log << "On dessine la voiture" << endl;
