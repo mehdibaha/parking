@@ -83,13 +83,13 @@ static void garer(Voiture& message)
 			break;
 	}
 	
-	log << "On dessine la voiture..." << endl;
+	//log << "On dessine la voiture..." << endl;
 	DessinerVoitureBarriere(typeBarriere, message.usager);
-	log << "Voiture dessinée" << endl;
+	//log << "Voiture dessinée" << endl;
 	// TODO : heu, lecture d'une MP ligne en dessous... mutex ?
 	if (*nbPlaces < NB_PLACES_PARKING)
 	{
-		log << "Il y a de la place" << endl;
+		//log << "Il y a de la place" << endl;
 		
 		// Init sembuf
 		struct sembuf semOp;
@@ -101,11 +101,6 @@ static void garer(Voiture& message)
 			(*nbPlaces)++;
 			semOp.sem_op = 1;
 		semop( semaphoreID, &semOp, 1 );
-		
-		RequeteEntree requete;
-		requete.numVoiture = message.numVoiture;
-		requete.usager = message.usager;
-		requete.heureArrive = time(NULL);
 
 		pid_t pidCourant = GarerVoiture(typeBarriere);
 		if (pidCourant != -1)
@@ -113,11 +108,11 @@ static void garer(Voiture& message)
 			voitureMap.insert(make_pair(pidCourant, message));
 		}
 		
-		log << "On a crée une tache pour garer la voiture : " << pidCourant << endl;
+		//log << "On a crée une tache pour garer la voiture : " << pidCourant << endl;
 	}
 	else
 	{
-		log << "Il n'y avait pas de place"  << endl;
+		//log << "Il n'y avait pas de place"  << endl;
 		msg = message;
 		// Init sembuf
 		struct sembuf semOp;
@@ -134,12 +129,12 @@ static void garer(Voiture& message)
 		
 		AfficherRequete(typeBarriere, req->usager, req->heureArrive);
 		
-		log << "Requete mise à jour, attente de SIGUSR1..." << endl;
+		//log << "Requete mise à jour, attente de SIGUSR1..." << endl;
 		do
 		{
 			pause();	// On s'endort jusqu'à ce qu'on recoive un signal
 		} while( signalRecu != SIGUSR1 );
-		log << "On est sorti de la pause !" << endl;
+		//log << "On est sorti de la pause !" << endl;
 		signalRecu = 0;
 		// NB :		do-while pour éviter de faire quelque chose si on a recu autre chose que sigusr1
 		
@@ -153,7 +148,7 @@ static void placeLibre( int noSignal )
 // Mode d'emploi :
 //
 {
-	log << "ON A RECU SIGUR1" << endl;
+	//log << "ON A RECU SIGUR1" << endl;
 	// Init sembuf
 	struct sembuf semOp;
 	semOp.sem_op = -1;
@@ -173,8 +168,8 @@ static void fin ( int noSignal )
 // Mode d'emploi :
 //
 {
-	log << "On a recu le signal de fin" << endl;
-	log.close();
+	//log << "On a recu le signal de fin" << endl;
+	//log.close();
     sigaction( SIGCHLD, NULL, NULL );
 	sigaction( SIGUSR1, NULL, NULL );
 	sigaction( SIGUSR2, NULL, NULL );
@@ -206,11 +201,11 @@ static void mortFils ( int noSignal )
 //			Pas besoin d'envoyer un signal
 // TODO FAIT ?
 {
-	log << "Un fils est mort : ";
+	//log << "Un fils est mort : ";
     // Prises des informations liées à la mort du fils
     int statut;
     pid_t pidFils = waitpid( -1, &statut, WNOHANG );
-	log << pidFils << endl;
+	//log << pidFils << endl;
     int numPlace = WEXITSTATUS(statut);
     time_t heureEntree = time( NULL );
 
@@ -219,14 +214,14 @@ static void mortFils ( int noSignal )
     // Si ce fils existait bel et bien, on le supprime et on fait les traitements associés
     if( itr != voitureMap.end( ) )
     {
-		log << "Ce fils était connu" << endl;
-		log << "Il a garé la voiture à la place " << numPlace << endl;
+		//log << "Ce fils était connu" << endl;
+		//log << "Il a garé la voiture à la place " << numPlace << endl;
         Voiture v = itr->second;
 		
-		log << "Cette voiture :" << endl;
-		log << "-> Est arrivée à " << heureEntree << endl;
-		log << "-> A le numéro " << v.numVoiture << endl;
-		log << "-> Appartient à un usager de type " << v.usager << endl;
+		//log << "Cette voiture :" << endl;
+		//log << "-> Est arrivée à " << heureEntree << endl;
+		//log << "-> A le numéro " << v.numVoiture << endl;
+		//log << "-> Appartient à un usager de type " << v.usager << endl;
 		
         // Init sembuf
         struct sembuf semOp;
@@ -234,8 +229,8 @@ static void mortFils ( int noSignal )
         semOp.sem_op = -1;
         semOp.sem_flg = NULL;
 		
-		log << "SemBuf init... Demande maj parking" << endl;
-		log << "Le sémaphore a une valeur de " << semctl(semaphoreID, SEM_PARKING, GETVAL, NULL) << endl;
+		//log << "SemBuf init... Demande maj parking" << endl;
+		//log << "Le sémaphore a une valeur de " << semctl(semaphoreID, SEM_PARKING, GETVAL, NULL) << endl;
         // Mise à jour des places de parking
         while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
 			parking[numPlace-1].heureArrive = heureEntree;
@@ -244,19 +239,19 @@ static void mortFils ( int noSignal )
 			semOp.sem_op = 1;
         semop( semaphoreID, &semOp, 1 );
 
-		log << "Done. Maj affichage entree" << endl;
+		//log << "Done. Maj affichage entree" << endl;
 		// Mise à jour de l'affichage de l'entrée
 		AfficherPlace(v.numVoiture, v.usager, v.heureArrive, heureEntree);
 		Afficher(ConvertZone(numPlace), "ENTERING");
 
-		log << "Done. Maj affichage parking" << endl;
+		//log << "Done. Maj affichage parking" << endl;
 		// Mise à jour de l'affichage du parking
 		Afficher(ConvertZone(numPlace), "ENTERING");
 
         voitureMap.erase( itr );
 		
-		log << "Fin du handler se SIGCHLD..." << endl;
-		log << "Au passage, errno vaut : " << errno << endl;
+		//log << "Fin du handler se SIGCHLD..." << endl;
+		//log << "Au passage, errno vaut : " << errno << endl;
     }
 
 } //----- fin de mortFils
@@ -265,23 +260,23 @@ static void moteur( long type )
 // Mode d'emploi :
 //
 {
-	log << "Phase MOTEUR..." << endl;
+	//log << "Phase MOTEUR..." << endl;
     Voiture message;
-	log << "Struct voiture cree" << endl;
+	//log << "Struct voiture cree" << endl;
 
 	for( ;; )
 	{
-		log << "In INIFINITE LOOP - waiting for a car to arrive" << endl;
+		//log << "In INIFINITE LOOP - waiting for a car to arrive" << endl;
 		while( msgrcv( boiteID, (void*) &message, sizeof(struct voiture)-sizeof(long), type, NULL ) == -1 && errno == EINTR );
 
-		log << "Une voiture est arrivée" << endl;
-		log << "Il y a " << *nbPlaces << " places occupees" << endl;
+		//log << "Une voiture est arrivée" << endl;
+		//log << "Il y a " << *nbPlaces << " places occupees" << endl;
 		
 		// Lancer la tâche qui va faire rentrer la voiture
 		garer(message);
 		
 	}
-	log << "On est sorti de la boucle infinie !! :o"  << endl;
+	//log << "On est sorti de la boucle infinie !! :o"  << endl;
 } //----- fin de moteur
 
 static void init( )
@@ -321,7 +316,7 @@ static void init( )
 void Entree( int balID, int parkingID, int immatriculationID, int nombrePlacesOccupeesID,
                 int requeteID, int semID, int numSemRequete, long type )
 {
-	log.open("entree.log");
+	//log.open("entree.//log");
 	
 	// Init globaux privés
 	boiteID = balID;
@@ -333,14 +328,14 @@ void Entree( int balID, int parkingID, int immatriculationID, int nombrePlacesOc
 	numSemReq = numSemRequete;
 	typeBar = type;
 	
-	log << "INIT globaux OK" << endl;
+	//log << "INIT globaux OK" << endl;
 	
 	
 	
 	// Phase d'INITIALISATION
     init( );
 	
-	log << "Phase INIT OK" << endl;
+	//log << "Phase INIT OK" << endl;
 
 	// Phase MOTEUR
     moteur( type );
