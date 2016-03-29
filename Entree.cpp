@@ -84,7 +84,7 @@ static void garer(Voiture& message)
 	}
 	
 	//log << "On dessine la voiture..." << endl;
-	DessinerVoitureBarriere(typeBarriere, message.usager);
+	//DessinerVoitureBarriere(typeBarriere, message.usager);
 	//log << "Voiture dessinée" << endl;
 	// TODO : heu, lecture d'une MP ligne en dessous... mutex ?
 	if (*nbPlaces < NB_PLACES_PARKING)
@@ -159,6 +159,10 @@ static void placeLibre( int noSignal )
 		req->usager = AUCUN;
 		semOp.sem_op = 1;
 	semop( semaphoreID, &semOp, 1 );
+	
+	// Effacement ecran requete
+	Effacer( ConvertNumSemToZone( numSemReq ) );
+	
 	signalRecu = noSignal;
 	garer(msg);
 }
@@ -241,12 +245,12 @@ static void mortFils ( int noSignal )
 
 		//log << "Done. Maj affichage entree" << endl;
 		// Mise à jour de l'affichage de l'entrée
-		AfficherPlace(v.numVoiture, v.usager, v.heureArrive, heureEntree);
-		Afficher(ConvertZone(numPlace), "ENTERING");
+		//AfficherPlace(v.numVoiture, v.usager, v.heureArrive, heureEntree);
+		//Afficher(ConvertZone(numPlace), "ENTERING");
 
 		//log << "Done. Maj affichage parking" << endl;
 		// Mise à jour de l'affichage du parking
-		Afficher(ConvertZone(numPlace), "ENTERING");
+		//Afficher(ConvertZone(numPlace), "ENTERING");
 
         voitureMap.erase( itr );
 		

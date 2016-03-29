@@ -130,7 +130,7 @@ static void mortFils ( int noSignal )
 		// Mise à jour de l'affichage de la sortie
 		while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
 			//log << "Autorisation donnée par le sémaphore" << endl;
-			AfficherSortie( parking[numPlace-1].usager, parking[numPlace-1].numVoiture, parking[numPlace-1].heureArrive, heureDepart );
+			//AfficherSortie( parking[numPlace-1].usager, parking[numPlace-1].numVoiture, parking[numPlace-1].heureArrive, heureDepart );
 			// NB : on dispose d'une ressource et on en demande une autre via AfficherSortie,
 			//		mais cela ne devrait pas mener à un interblocage.
 			semOp.sem_op = 1;
@@ -139,7 +139,7 @@ static void mortFils ( int noSignal )
 		//log << "Done. Maj affichage parking demandée" << endl;
 
         // Mise à jour de l'affichage du parking
-        Afficher(ConvertZone(numPlace), "LEAVING");
+        //Afficher(ConvertZone(numPlace), "LEAVING");
 		
 		//log << "Done. Maj parking demandée" << endl;
 		

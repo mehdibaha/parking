@@ -91,7 +91,8 @@ union semun {
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-TypeZone ConvertZone(int numPlace);
+TypeZone ConvertPlaceToZone( int numPlace );
+TypeZone ConvertNumSemToZone( int numSem );
 // Mode d'emploi :
 //
 

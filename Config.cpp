@@ -34,7 +34,7 @@
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-TypeZone ConvertZone(int numPlace)
+TypeZone ConvertPlaceToZone(int numPlace)
 // Algorithme :
 //
 {
@@ -64,6 +64,28 @@ TypeZone ConvertZone(int numPlace)
             break;
         case 8:
             typeZone = ETAT_P8;
+            break;
+        default:
+            break;
+    }
+    return typeZone;
+} //----- fin de convertZone
+
+TypeZone ConvertNumSemToZone(int numSem)
+// Algorithme :
+//
+{
+	TypeZone typeZone;
+    switch(numSem)
+    {
+        case SEM_REQUETE_BP_PROFS:
+            typeZone = REQUETE_R1;
+            break;
+        case SEM_REQUETE_BP_AUTRES:
+            typeZone = REQUETE_R2;
+            break;
+		case SEM_REQUETE_GB:
+            typeZone = REQUETE_R3;
             break;
         default:
             break;
