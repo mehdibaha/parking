@@ -139,6 +139,7 @@ static void garer(Voiture& message)
 		{
 			pause();	// On s'endort jusqu'à ce qu'on recoive un signal
 		} while( signalRecu != SIGUSR1 );
+		log << "On est sorti de la pause !" << endl;
 		signalRecu = 0;
 		// NB :		do-while pour éviter de faire quelque chose si on a recu autre chose que sigusr1
 		
@@ -237,7 +238,6 @@ static void mortFils ( int noSignal )
 		log << "Le sémaphore a une valeur de " << semctl(semaphoreID, SEM_PARKING, GETVAL, NULL) << endl;
         // Mise à jour des places de parking
         while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
-			log << "Succes réservation ? errno vaut : " << errno << endl;
 			parking[numPlace-1].heureArrive = heureEntree;
 			parking[numPlace-1].numVoiture = v.numVoiture;
 			parking[numPlace-1].usager = v.usager;
