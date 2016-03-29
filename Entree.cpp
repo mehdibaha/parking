@@ -155,13 +155,6 @@ static void mortFils ( int noSignal )
 		// Mise à jour de l'affichage du parking
 		Afficher(ConvertZone(numPlace), "ENTERING");
 
-		semOp.sem_op = -1;
-		semOp.sem_num = SEM_NB_PLACES_OCCUPEES;
-		while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
-			(*nbPlaces)++; // TODO C'est bien là ?
-			semOp.sem_op = 1;
-		semop( semaphoreID, &semOp, 1 );
-
         voitureMap.erase( itr );
 		
 		log << "Fin du handler se SIGCHLD..." << endl;
@@ -190,6 +183,18 @@ static void moteur( long type )
 		if (*nbPlaces < NB_PLACES_PARKING)
 		{
 			log << "Il y a de la place" << endl;
+			
+			// Init sembuf
+			struct sembuf semOp;
+			semOp.sem_op = -1;
+			semOp.sem_num = SEM_NB_PLACES_OCCUPEES;
+			semOp.sem_flg = NULL;
+			// Mise à jour du nombre de place occupées
+			while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
+				(*nbPlaces)++;
+				semOp.sem_op = 1;
+			semop( semaphoreID, &semOp, 1 );
+			
 			RequeteEntree requete;
 			requete.numVoiture = voitureMap.size(); // CHOIX DE NUMEROTATION
 			requete.usager = message.usager;
