@@ -154,10 +154,10 @@ static void mortFils ( int noSignal )
 		
 		log << "Done. Maj nombre place demandée" << endl;
 		
-		// Mise à jour du nombre de voitures
+		// Variables pour envoi potentiel de signal
 		bool envoyerSignal = false;
-		pid_t entreeADebloquer;
 		
+		// Mise à jour du nombre de voitures
 		semOp.sem_op = -1;
 		semOp.sem_num = SEM_COMPTEUR;
 		while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
@@ -179,17 +179,22 @@ static void mortFils ( int noSignal )
 			time_t meilleureHeure = 0;
 			enum TypeUsager usager = AUCUN;
 			enum TypeUsager bestUsager = AUCUN;
+			pid_t entreeADebloquer = 0;
+			
+			log << "Verif requete GB... (" << entreesPID[NUM_PID_ENTREE_GB] << ")" << endl;
 			
 			semOp.sem_op = -1;
-			semOp.sem_num = NUM_PID_ENTREE_GB;
+			semOp.sem_num = SEM_REQUETE_GB;
 			while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
 				bestUsager = requeteEGB->usager;
 				meilleureHeure = requeteEGB->heureArrive;
 				semOp.sem_op = 1;
 			semop( semaphoreID, &semOp, 1 );
 			
+			log << "Done. Verif requete BP profs... (" << entreesPID[NUM_PID_ENTREE_BP_PROFS] << ")" << endl;
+			
 			semOp.sem_op = -1;
-			semOp.sem_num = NUM_PID_ENTREE_BP_PROFS;
+			semOp.sem_num = SEM_REQUETE_BP_PROFS;
 			while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
 				usager = requeteEBP_profs->usager;
 				heure = requeteEBP_profs->heureArrive;
@@ -200,6 +205,7 @@ static void mortFils ( int noSignal )
 				meilleureHeure = heure;
 				bestUsager = usager;
 				entreeADebloquer = entreesPID[NUM_PID_ENTREE_BP_PROFS];
+				log << "On choisit BPProfs car prof prio" << endl;
 			}
 			else if( bestUsager == PROF && usager == PROF )
 			{
@@ -207,19 +213,25 @@ static void mortFils ( int noSignal )
 				{
 					meilleureHeure = heure;
 					entreeADebloquer = entreesPID[NUM_PID_ENTREE_BP_PROFS];
+					log << "On choisit BPProfs car prof avant l'autre" << endl;
 				}					
 			}
 			else if( bestUsager == AUCUN && usager == AUCUN)
 			{
 				// Ne rien faire
+				log << "On ne choisit personne" << endl;
 			}
 			else
 			{
 				entreeADebloquer = entreesPID[NUM_PID_ENTREE_GB];
+				log << "On choisit GB" << endl;
 			}
 			
+			log << "entreeADebloquer vaut " << entreeADebloquer << endl;
+			log << "Done. Verif requete BP autres... (" << entreesPID[NUM_PID_ENTREE_BP_AUTRES] << ")" << endl;
+			
 			semOp.sem_op = -1;
-			semOp.sem_num = NUM_PID_ENTREE_BP_AUTRES;
+			semOp.sem_num = SEM_REQUETE_BP_AUTRES;
 			while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
 				usager = requeteEBP_profs->usager;
 				heure = requeteEBP_profs->heureArrive;
@@ -228,6 +240,7 @@ static void mortFils ( int noSignal )
 			if( bestUsager == PROF  || ( bestUsager == AUCUN && usager == AUCUN ) || usager == AUCUN )
 			{
 				// Ne rien faire
+				log << "On choisit le precedent" << endl;
 			}
 			else if( bestUsager == AUTRE && usager == AUTRE )
 			{
@@ -235,14 +248,28 @@ static void mortFils ( int noSignal )
 				{
 					meilleureHeure = heure;
 					entreeADebloquer = entreesPID[NUM_PID_ENTREE_BP_AUTRES];
+					log << "On choisit BPAutres car + en avance" << endl;
+				}
+				else
+				{
+					// On garde le précédent
+					log << "On choisit le precedent car + en avance" << endl;
 				}
 			}
 			else 
 			{
 				entreeADebloquer = entreesPID[NUM_PID_ENTREE_BP_AUTRES];
+				log << "On choisit le precedent car + en avance" << endl;
 			}
 			
-			kill( entreeADebloquer, SIGUSR1 );
+			log << "Done." << endl;
+			log << "Il faut débloquer l'entrée " << entreeADebloquer << endl;
+			
+			if( entreeADebloquer )
+			{
+				kill( entreeADebloquer, SIGUSR1 );
+			}
+			
 		}
 	}
 	

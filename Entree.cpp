@@ -107,10 +107,6 @@ static void garer(Voiture& message)
 		requete.usager = message.usager;
 		requete.heureArrive = time(NULL);
 
-		AfficherRequete(typeBarriere, message.usager, requete.heureArrive);
-		
-		log << "Requete affichée" << endl;
-
 		pid_t pidCourant = GarerVoiture(typeBarriere);
 		if (pidCourant != -1)
 		{
@@ -123,6 +119,22 @@ static void garer(Voiture& message)
 	{
 		log << "Il n'y avait pas de place"  << endl;
 		msg = message;
+		// Init sembuf
+		struct sembuf semOp;
+		semOp.sem_op = -1;
+		semOp.sem_num = numSemReq;
+		semOp.sem_flg = NULL;
+		// Mise à jour de la requete
+		while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
+			req->numVoiture = msg.numVoiture;
+			req->usager = msg.usager;
+			req->heureArrive = time(NULL);
+			semOp.sem_op = 1;
+		semop( semaphoreID, &semOp, 1 );
+		
+		AfficherRequete(typeBarriere, req->usager, req->heureArrive);
+		
+		log << "Requete mise à jour, attente de SIGUSR1..." << endl;
 		do
 		{
 			pause();	// On s'endort jusqu'à ce qu'on recoive un signal
@@ -140,14 +152,16 @@ static void placeLibre( int noSignal )
 // Mode d'emploi :
 //
 {
+	log << "ON A RECU SIGUR1" << endl;
 	// Init sembuf
 	struct sembuf semOp;
 	semOp.sem_op = -1;
 	semOp.sem_num = numSemReq;
 	semOp.sem_flg = NULL;
-	// Mise à jour du nombre de places occupées
+	// Mise à jour de la requete
 	while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
 		req->usager = AUCUN;
+		semOp.sem_op = 1;
 	semop( semaphoreID, &semOp, 1 );
 	signalRecu = noSignal;
 	garer(msg);
@@ -161,6 +175,8 @@ static void fin ( int noSignal )
 	log << "On a recu le signal de fin" << endl;
 	log.close();
     sigaction( SIGCHLD, NULL, NULL );
+	sigaction( SIGUSR1, NULL, NULL );
+	sigaction( SIGUSR2, NULL, NULL );
 	
 	shmdt( parking );
     shmdt( nbPlaces );
@@ -278,8 +294,12 @@ static void init( )
     req = (requeteEntree*) shmat( reqID, NULL, NULL );
 	immatriculation = (int*) shmat( immatID, NULL, NULL );
 	
-
-	// TODO: Handle SIGUSR1
+	// Armer SIGUSR1 sur placeLibre
+	struct sigaction sigusr1Action;
+    sigusr1Action.sa_handler = placeLibre;
+    sigemptyset( &sigusr1Action.sa_mask );
+    sigusr1Action.sa_flags = 0;
+    sigaction( SIGUSR1, &sigusr1Action, NULL );
 	
     // Armer SIGUSR2 sur fin
     struct sigaction sigusr2Action;
