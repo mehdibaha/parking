@@ -126,6 +126,7 @@ static void mortFils ( int noSignal )
 		
 		//log << "Sembuf init... Demande affichage sortie (via valeurs de parking)" << endl;
 		//log << "Le semaphore vaut : " << semctl(semaphoreID, SEM_PARKING, GETVAL, NULL) << endl;
+		Effacer(ConvertPlaceToZone(numPlace));
 		
 		// Mise à jour de l'affichage de la sortie
 		while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );

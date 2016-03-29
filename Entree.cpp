@@ -245,8 +245,7 @@ static void mortFils ( int noSignal )
 
 		//log << "Done. Maj affichage entree" << endl;
 		// Mise à jour de l'affichage de l'entrée
-		//AfficherPlace(v.numVoiture, v.usager, v.heureArrive, heureEntree);
-		//Afficher(ConvertZone(numPlace), "ENTERING");
+		AfficherPlace( numPlace, v.usager, v.numVoiture, v.heureArrive );
 
 		//log << "Done. Maj affichage parking" << endl;
 		// Mise à jour de l'affichage du parking
