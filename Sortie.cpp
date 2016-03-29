@@ -110,7 +110,7 @@ static void mortFils ( int noSignal )
 		itr++;
 	}
 	
-	log << "Il avait le PID : " << *itr << endl;
+	log << "On a trouvé dans la liste des fils le PID : " << *itr << endl;
 	
 	// Si ce fils existait bel et bien, on le supprime et on fait les traitements associés
 	if( itr != listeFils.end( ) )
@@ -128,7 +128,7 @@ static void mortFils ( int noSignal )
 		log << "Le semaphore vaut : " << semctl(semaphoreID, SEM_PARKING, GETVAL, NULL) << endl;
 		
 		// Mise à jour de l'affichage de la sortie
-		semop( semaphoreID, &semOp, 1 );
+		while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
 			log << "Autorisation donnée par le sémaphore" << endl;
 			AfficherSortie( parking[numPlace-1].usager, parking[numPlace-1].numVoiture, parking[numPlace-1].heureArrive, heureDepart );
 			// NB : on dispose d'une ressource et on en demande une autre via AfficherSortie,
@@ -145,7 +145,7 @@ static void mortFils ( int noSignal )
 		
 		// Mise à jour des places de parking
 		semOp.sem_op = -1;
-		semop( semaphoreID, &semOp, 1 );
+		while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
 			log << "Autorisation donnée par le sémaphore" << endl;
 			parking[numPlace-1].usager = AUCUN;
 			parking[numPlace-1].numVoiture = 0;
@@ -160,7 +160,7 @@ static void mortFils ( int noSignal )
 		
 		semOp.sem_op = -1;
 		semOp.sem_num = SEM_COMPTEUR;
-		semop( semaphoreID, &semOp, 1 );
+		while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
 			log << "Autorisation donnée par le sémaphore" << endl;
 			if(--(*nbPlaces) == NB_PLACES_PARKING-1)
 			{
@@ -182,6 +182,7 @@ static void mortFils ( int noSignal )
 			
 			semOp.sem_op = -1;
 			semOp.sem_num = NUM_PID_ENTREE_GB;
+			while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
 				bestUsager = requeteEGB->usager;
 				meilleureHeure = requeteEGB->heureArrive;
 				semOp.sem_op = 1;
@@ -189,6 +190,7 @@ static void mortFils ( int noSignal )
 			
 			semOp.sem_op = -1;
 			semOp.sem_num = NUM_PID_ENTREE_BP_PROFS;
+			while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
 				usager = requeteEBP_profs->usager;
 				heure = requeteEBP_profs->heureArrive;
 				semOp.sem_op = 1;
@@ -218,6 +220,7 @@ static void mortFils ( int noSignal )
 			
 			semOp.sem_op = -1;
 			semOp.sem_num = NUM_PID_ENTREE_BP_AUTRES;
+			while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
 				usager = requeteEBP_profs->usager;
 				heure = requeteEBP_profs->heureArrive;
 				semOp.sem_op = 1;
