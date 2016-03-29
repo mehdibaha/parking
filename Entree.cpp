@@ -60,6 +60,53 @@ static int signalRecu = 0;
 static ofstream log;
 
 //------------------------------------------------------ Fonctions privées
+static void garer(Voiture& message, TypeBarriere& typeBarriere)
+{
+	// TODO : heu, lecture d'une MP ligne en dessous... mutex ?
+		if (*nbPlaces < NB_PLACES_PARKING)
+		{
+			log << "Il y a de la place" << endl;
+			
+			// Init sembuf
+			struct sembuf semOp;
+			semOp.sem_op = -1;
+			semOp.sem_num = SEM_NB_PLACES_OCCUPEES;
+			semOp.sem_flg = NULL;
+			// Mise à jour du nombre de place occupées
+			while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
+				(*nbPlaces)++;
+				semOp.sem_op = 1;
+			semop( semaphoreID, &semOp, 1 );
+			
+			RequeteEntree requete;
+			requete.numVoiture = voitureMap.size(); // CHOIX DE NUMEROTATION
+			requete.usager = message.usager;
+			requete.heureArrive = time(NULL);
+
+			AfficherRequete(typeBarriere, message.usager, requete.heureArrive);
+			
+			log << "Requete affichée" << endl;
+
+			pid_t pidCourant = GarerVoiture(typeBarriere);
+			if (pidCourant != -1)
+			{
+				voitureMap.insert(make_pair(pidCourant, message));
+			}
+			
+			log << "On a crée une tache pour garer la voiture : " << pidCourant << endl;
+		}
+		else
+		{
+			log << "Il n'y avait pas de place"  << endl;
+			/*do
+			{
+				pause();	// On s'endort jusqu'à ce qu'on recoive un signal
+			while( signalRecu != SIGUSR1 );
+			signalRecu = 0;*/
+			// NB :		do-while pour éviter de faire quelque chose si on a recu autre chose que sigusr1
+			
+		}
+}
 // TODO :	Lorsque Entree est coincée parcequ'il n'y a plus de places dans le parking,
 //			c'est sortie qui la débloque en lui envoyant un signal SIGUSR1.
 //			Il faut donc handle ce signal
@@ -178,75 +225,30 @@ static void moteur( long type )
 
 		log << "Une voiture est arrivée" << endl;
 		log << "Il y a " << *nbPlaces << " places occupees" << endl;
+		
+		TypeBarriere typeBarriere;
+		switch(type)
+		{
+			case MSG_TYPE_ENTREE_GB:
+				typeBarriere = ENTREE_GASTON_BERGER;
+				break;
+			case MSG_TYPE_ENTREE_BP_PROFS:
+				typeBarriere = PROF_BLAISE_PASCAL;
+				break;
+			case MSG_TYPE_ENTREE_BP_AUTRES:
+				typeBarriere = AUTRE_BLAISE_PASCAL;
+				break;
+			default:
+				typeBarriere = AUCUNE;
+				break;
+		}
+		
+		log << "On dessine la voiture..." << endl;
+		DessinerVoitureBarriere(typeBarriere, message.usager);
+		log << "Voiture dessinée" << endl;
+		
 		// Lancer la tâche qui va faire rentrer la voiture
-		// TODO : heu, lecture d'une MP ligne en dessous... mutex ?
-		if (*nbPlaces < NB_PLACES_PARKING)
-		{
-			log << "Il y a de la place" << endl;
-			
-			// Init sembuf
-			struct sembuf semOp;
-			semOp.sem_op = -1;
-			semOp.sem_num = SEM_NB_PLACES_OCCUPEES;
-			semOp.sem_flg = NULL;
-			// Mise à jour du nombre de place occupées
-			while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
-				(*nbPlaces)++;
-				semOp.sem_op = 1;
-			semop( semaphoreID, &semOp, 1 );
-			
-			RequeteEntree requete;
-			requete.numVoiture = voitureMap.size(); // CHOIX DE NUMEROTATION
-			requete.usager = message.usager;
-			requete.heureArrive = time(NULL);
-
-			TypeBarriere typeBarriere;
-			switch(type)
-			{
-				case MSG_TYPE_ENTREE_GB:
-					typeBarriere = ENTREE_GASTON_BERGER;
-					break;
-				case MSG_TYPE_ENTREE_BP_PROFS:
-					typeBarriere = PROF_BLAISE_PASCAL;
-					break;
-				case MSG_TYPE_ENTREE_BP_AUTRES:
-					typeBarriere = AUTRE_BLAISE_PASCAL;
-					break;
-				default:
-					typeBarriere = AUCUNE;
-					break;
-					
-			}
-			
-			log << "On dessine la voiture" << endl;
-
-			DessinerVoitureBarriere(typeBarriere, message.usager);
-			
-			log << "Voiture dessinée" << endl;
-
-			AfficherRequete(typeBarriere, message.usager, requete.heureArrive);
-			
-			log << "Requete affichée" << endl;
-
-			pid_t pidCourant = GarerVoiture(typeBarriere);
-			if (pidCourant != -1)
-			{
-				voitureMap.insert(make_pair(pidCourant, message));
-			}
-			
-			log << "On a crée une tache pour garer la voiture : " << pidCourant << endl;
-		}
-		else
-		{
-			log << "Il n'y avait pas de place"  << endl;
-			/*do
-			{
-				pause();	// On s'endort jusqu'à ce qu'on recoive un signal
-			while( signalRecu != SIGUSR1 );
-			signalRecu = 0;*/
-			// NB :		do-while pour éviter de faire quelque chose si on a recu autre chose que sigusr1
-			
-		}
+		garer(message, typeBarriere);
 		
 	}
 	log << "On est sorti de la boucle infinie !! :o"  << endl;
