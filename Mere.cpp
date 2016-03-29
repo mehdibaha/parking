@@ -113,14 +113,14 @@ int main ( int argc, char ** argv )
     {
         Entree( balID, parkingID, immatriculationID, nombrePlacesOccupeesID, requetesID[REQ_GB], semID, SEM_REQUETE_GB, MSG_TYPE_ENTREE_GB );
     }
-	/*else if( ( entreeProfsBP = fork( ) ) == 0 )
+	else if( ( entreeProfsBP = fork( ) ) == 0 )
 	{
 		Entree( balID, parkingID, immatriculationID, nombrePlacesOccupeesID, requetesID[REQ_BP_PROFS], semID, SEM_REQUETE_BP_PROFS, MSG_TYPE_ENTREE_BP_PROFS );
 	}
 	else if( ( entreeAutresBP = fork( ) ) == 0 )
 	{
 		Entree( balID, parkingID, immatriculationID, nombrePlacesOccupeesID, requetesID[REQ_BP_AUTRES], semID, SEM_REQUETE_BP_AUTRES, MSG_TYPE_ENTREE_BP_AUTRES );
-	}*/
+	}
 	else if( ( sortie = fork( ) ) == 0 )
 	{
 		pid_t entreesID[NB_ENTREES];
@@ -143,10 +143,10 @@ int main ( int argc, char ** argv )
 		// TODO :	faire une fonction de destruction
 		kill( sortie, SIGUSR2 );
 		waitpid( sortie, NULL, 0 );
-		/*kill( entreeAutresBP, SIGUSR2 );
+		kill( entreeAutresBP, SIGUSR2 );
 		waitpid( entreeAutresBP, NULL, 0 );
 		kill( entreeProfsBP, SIGUSR2 );
-		waitpid( entreeProfsBP, NULL, 0 );*/
+		waitpid( entreeProfsBP, NULL, 0 );
 		kill( entreeGB, SIGUSR2 );
 		waitpid( entreeGB, NULL, 0 );
 		kill( temps, SIGUSR2 );

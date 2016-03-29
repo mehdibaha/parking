@@ -50,7 +50,7 @@ static struct placeParking* parking;
 static int* nbPlaces;
 static struct requeteEntree* requeteEGB;
 static struct requeteEntree* requeteEBP_profs;
-static struct requeteEntree* requeteEGB_autres;
+static struct requeteEntree* requeteEBP_autres;
 
 // Debug
 static ofstream log;
@@ -70,7 +70,7 @@ static void fin ( int noSignal )
 	sigaction( SIGCHLD, NULL, NULL );
 	shmdt( nbPlaces );
 	shmdt( parking );
-	shmdt( requeteEGB_autres );
+	shmdt( requeteEBP_autres );
 	shmdt( requeteEBP_profs );
 	shmdt( requeteEGB );
 	
@@ -209,12 +209,17 @@ static void mortFils ( int noSignal )
 			}
 			else if( bestUsager == PROF && usager == PROF )
 			{
-				if ( heure > meilleureHeure )
+				if ( heure < meilleureHeure )
 				{
 					meilleureHeure = heure;
 					entreeADebloquer = entreesPID[NUM_PID_ENTREE_BP_PROFS];
 					log << "On choisit BPProfs car prof avant l'autre" << endl;
-				}					
+				}
+				else
+				{
+					entreeADebloquer = entreesPID[NUM_PID_ENTREE_GB];
+					log << "On garde GB car prof avant l'autre" << endl;
+				}
 			}
 			else if( bestUsager == AUCUN && usager == AUCUN)
 			{
@@ -233,8 +238,8 @@ static void mortFils ( int noSignal )
 			semOp.sem_op = -1;
 			semOp.sem_num = SEM_REQUETE_BP_AUTRES;
 			while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
-				usager = requeteEBP_profs->usager;
-				heure = requeteEBP_profs->heureArrive;
+				usager = requeteEBP_autres->usager;
+				heure = requeteEBP_autres->heureArrive;
 				semOp.sem_op = 1;
 			semop( semaphoreID, &semOp, 1 );
 			if( bestUsager == PROF  || ( bestUsager == AUCUN && usager == AUCUN ) || usager == AUCUN )
@@ -244,7 +249,7 @@ static void mortFils ( int noSignal )
 			}
 			else if( bestUsager == AUTRE && usager == AUTRE )
 			{
-				if ( heure > meilleureHeure )
+				if ( heure < meilleureHeure )
 				{
 					meilleureHeure = heure;
 					entreeADebloquer = entreesPID[NUM_PID_ENTREE_BP_AUTRES];
@@ -293,7 +298,7 @@ void Sortie( int parkingID, int balID, int nombrePlacesOccupeesID, int* requetes
 	// Attachement aux mps
 	requeteEGB = (requeteEntree*) shmat( requetesID[REQ_GB], NULL, NULL );
 	requeteEBP_profs = (requeteEntree*) shmat( requetesID[REQ_BP_PROFS], NULL, NULL );
-	requeteEGB_autres = (requeteEntree*) shmat( requetesID[REQ_BP_AUTRES], NULL, NULL );
+	requeteEBP_autres = (requeteEntree*) shmat( requetesID[REQ_BP_AUTRES], NULL, NULL );
 	parking = (placeParking*) shmat( parkingID, NULL, NULL );
 	nbPlaces = (int*) shmat( nombrePlacesOccupeesID, NULL, NULL );
 	
