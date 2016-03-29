@@ -98,19 +98,24 @@ static void mortFils ( int noSignal )
 	// Prises des informations liées à la mort du fils
 	int statut;
 	pid_t pidFils = waitpid( -1, &statut, WNOHANG );
+	log << "Il avait le PID : " << pidFils << endl;
 	int numPlace = WEXITSTATUS(statut);
+	log << "Il a sortie une voiture de la place " << numPlace << endl;
 	time_t heureDepart = time( NULL );
 	
 	// On recherche le fils mort de la liste des fils
 	ListeFilsIterator itr = listeFils.begin( );
-	while ( itr != listeFils.end( ) || *itr != pidFils )
+	while ( itr != listeFils.end( ) && *itr != pidFils )
 	{
 		itr++;
 	}
 	
+	log << "Il avait le PID : " << *itr << endl;
+	
 	// Si ce fils existait bel et bien, on le supprime et on fait les traitements associés
 	if( itr != listeFils.end( ) )
 	{
+		log << "Il existait" << endl;
 		listeFils.erase( itr );
 		
 		// Init sembuf
@@ -119,26 +124,35 @@ static void mortFils ( int noSignal )
 		semOp.sem_op = -1;
 		semOp.sem_flg = NULL;
 		
+		log << "Sembuf init... Demande affichage sortie (via valeurs de parking)" << endl;
+		log << "Le semaphore vaut : " << semctl(semaphoreID, SEM_PARKING, GETVAL, NULL) << endl;
+		
 		// Mise à jour de l'affichage de la sortie
 		semop( semaphoreID, &semOp, 1 );
+			log << "Autorisation donnée par le sémaphore" << endl;
 			AfficherSortie( parking[numPlace-1].usager, parking[numPlace-1].numVoiture, parking[numPlace-1].heureArrive, heureDepart );
 			// NB : on dispose d'une ressource et on en demande une autre via AfficherSortie,
 			//		mais cela ne devrait pas mener à un interblocage.
 			semOp.sem_op = 1;
 		semop( semaphoreID, &semOp, 1 );
+		
+		log << "Done. Maj affichage parking demandée" << endl;
 
         // Mise à jour de l'affichage du parking
-        semop( semaphoreID, &semOp, 1 );
         Afficher(ConvertZone(numPlace), "LEAVING");
-        semOp.sem_op = 1;
-        semop( semaphoreID, &semOp, 1 );
+		
+		log << "Done. Maj parking demandée" << endl;
 		
 		// Mise à jour des places de parking
 		semOp.sem_op = -1;
 		semop( semaphoreID, &semOp, 1 );
+			log << "Autorisation donnée par le sémaphore" << endl;
 			parking[numPlace-1].usager = AUCUN;
+			parking[numPlace-1].numVoiture = 0;
 			semOp.sem_op = 1;
 		semop( semaphoreID, &semOp, 1 );
+		
+		log << "Done. Maj nombre place demandée" << endl;
 		
 		// Mise à jour du nombre de voitures
 		bool envoyerSignal = false;
@@ -147,6 +161,7 @@ static void mortFils ( int noSignal )
 		semOp.sem_op = -1;
 		semOp.sem_num = SEM_COMPTEUR;
 		semop( semaphoreID, &semOp, 1 );
+			log << "Autorisation donnée par le sémaphore" << endl;
 			if(--(*nbPlaces) == NB_PLACES_PARKING-1)
 			{
 				envoyerSignal = true;
@@ -154,9 +169,12 @@ static void mortFils ( int noSignal )
 			semOp.sem_op = 1;
 		semop( semaphoreID, &semOp, 1 );
 			
+		log << "Done. Doit-on envoyer un signal ? ";
+		
 		// Envoie d'un signal pour débloquer les entrées si nécessaire
 		if( envoyerSignal )
 		{
+			log << "Oui" << endl;
 			time_t heure = 0;
 			time_t meilleureHeure = 0;
 			enum TypeUsager usager = AUCUN;
