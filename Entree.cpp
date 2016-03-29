@@ -65,7 +65,6 @@ static ofstream log;
 //------------------------------------------------------ Fonctions privées
 static void garer(Voiture& message)
 {
-	
 	TypeBarriere typeBarriere;
 	switch(typeBar)
 	{
@@ -83,8 +82,13 @@ static void garer(Voiture& message)
 			break;
 	}
 	
-	//log << "On dessine la voiture..." << endl;
-	//DessinerVoitureBarriere(typeBarriere, message.usager);
+	
+	if( signalRecu != SIGUSR1 )
+	{
+		DessinerVoitureBarriere(typeBarriere, message.usager);
+	}
+	// Bah oui, sinon, on la redessine
+		
 	//log << "Voiture dessinée" << endl;
 	// TODO : heu, lecture d'une MP ligne en dessous... mutex ?
 	if (*nbPlaces < NB_PLACES_PARKING)
@@ -107,6 +111,8 @@ static void garer(Voiture& message)
 		{
 			voitureMap.insert(make_pair(pidCourant, message));
 		}
+		
+		sleep(1);
 		
 		//log << "On a crée une tache pour garer la voiture : " << pidCourant << endl;
 	}
