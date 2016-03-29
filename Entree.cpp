@@ -54,6 +54,8 @@ struct requeteEntree* req;
 
 static map<pid_t,Voiture> voitureMap;
 
+static int signalRecu = 0;
+
 // Debug
 static ofstream log;
 
@@ -62,6 +64,12 @@ static ofstream log;
 //			c'est sortie qui la débloque en lui envoyant un signal SIGUSR1.
 //			Il faut donc handle ce signal
 //			Attention il va y avoir des variables à remettre à jour (par exemple la MP de requete)
+static void placeLibre( int noSignal )
+// Mode d'emploi :
+//
+{
+	signalRecu = noSignal;
+}
 
 
 static void fin ( int noSignal )
@@ -223,8 +231,18 @@ static void moteur( long type )
 			
 			log << "On a crée une tache pour garer la voiture : " << pidCourant << endl;
 		}
+		else
+		{
+			log << "Il n'y avait pas de place"  << endl;
+			/*do
+			{
+				pause();	// On s'endort jusqu'à ce qu'on recoive un signal
+			while( signalRecu != SIGUSR1 );
+			signalRecu = 0;*/
+			// NB :		do-while pour éviter de faire quelque chose si on a recu autre chose que sigusr1
+			
+		}
 		
-		log << "Il n'y avait pas de place"  << endl;
 	}
 	log << "On est sorti de la boucle infinie !! :o"  << endl;
 } //----- fin de moteur
