@@ -284,6 +284,7 @@ void Sortie( int parkingID, int balID, int nombrePlacesOccupeesID, int* requetes
 //			Mise à jour des variables globales statiques
 //			Attachement aux MPs
 //			Masquage des signaux SIGUSR2 puis SIGCHLD
+//		MOTEUR
 //			Dans une boucle infinie
 //				Attendre qu'un message de type sortie arrive dans la boite aux lettres <balID>
 //				Lancer une tache fille qui va faire sortir la voiture associée au message reçu
@@ -320,7 +321,6 @@ void Sortie( int parkingID, int balID, int nombrePlacesOccupeesID, int* requetes
 	// MOTEUR
 	for( ;; )
 	{
-		//log << "Attente qu'une voiture sorte (INFINITE LOOP)..." << endl;
 		// Attendre devant la boite aux lettres
 		struct voiture message;
 		while( msgrcv( balID, (void*) &message, sizeof(struct voiture)-sizeof(long), MSG_TYPE_SORTIE, NULL ) == -1 && errno == EINTR );
