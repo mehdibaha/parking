@@ -1,5 +1,5 @@
 /*************************************************************************
-                                     Sortie
+                                    Sortie
 		    Tâche permettant à une voiture de sortir du parking
                              -------------------
     début                : 16/03/2016
@@ -52,8 +52,10 @@ void Sortie(	int parkingID, int balID, int nbPlacesOccupeesID,
 //		- Attend indéfiniement qu'une voiture veuille sortir du parking. Lorsque
 //		c'est le cas, lance une tâche fille qui fait sortir ladite voiture.
 //		- Une fois cette voiture complétement sortie, met à jour le tableau (MP)
-//		d'dentifiant <parkingID> ansi que la MP <nbPlacesOccupeesID> 
-//		et affiche à l'écran le nouvel état du parking.
+//		d'dentifiant <parkingID> ansi que la MP <nbPlacesOccupeesID>, 
+//		affiche à l'écran le nouvel état du parking et affiche des informations
+//		relative à la sortie (type d'usager, immatriculation, heures d'arrivée et
+//		de départ, temps total et prix associé)
 //		- Si le parking était plein et qu'une voiture vient de complétement sortir,
 //		cette fonction consulte les requêtes des MPs d'identifiants <requetesID>,
 //		et envoie si besoin le signal SIGUSR1 qui à l'entrée la plus prioritaire.

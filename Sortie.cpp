@@ -1,9 +1,10 @@
 /*************************************************************************
-                           Sortie  -  description
+								    Sortie
+		    Tâche permettant à une voiture de sortir du parking
                              -------------------
-    début                :
-    copyright            : (C) par
-    e-mail               :
+    début                : 16/03/2016
+    copyright            : (C) par Ruben
+    e-mail               : ruben.pericas-moya@insa-lyon.fr
 *************************************************************************/
 
 //---------- Réalisation de la tâche <Sortie> (fichier Sortie.cpp) ---
@@ -38,35 +39,43 @@ typedef std::list<pid_t>::iterator ListeFilsIterator;
 typedef std::list<pid_t>::const_iterator ConstListeFilsIterator;
 
 //---------------------------------------------------- Variables statiques
-static ListeFils listeFils;
+static ListeFils listeFils;	// Les fils encore vivants
 
-static int parkID;
-static int nbPlacesID;
-static int semaphoreID;
-static int* reqsID;
-static pid_t* entreesPID;
+static int parkID;			// Identifiant de la MP représentant l'état du parking
+static int nbPlacesID;		// Identifiant de la MP le nombre de places du parking occupées
+static int semaphoreID;		// Identifiant du sémaphore général
+static int* reqsID;			// Tableau des identifiants de MP utilisés par les tâches d'entrées
+							// pour signaler que le parking est plein mais qu'une voiture veut rentrer
+							
+static pid_t* entreesPID;	// Tableau des PIDs des tâches d'entrée
 
-static struct placeParking* parking;
-static int* nbPlaces;
-static struct requeteEntree* requeteEGB;
-static struct requeteEntree* requeteEBP_profs;
-static struct requeteEntree* requeteEBP_autres;
-
-// Debug
-static ofstream log;
+static struct placeParking* parking;			// Zone de la MP <parkID>
+static int* nbPlaces;							// Zone de la MP <nbPlacesID>
+static struct requeteEntree* requeteEGB;		// Zone d'une des MPs de <reqsID> (pour Gaston Berger)
+static struct requeteEntree* requeteEBP_profs;	// Zone d'une des MPs de <reqsID> (pour Blaise Pascal côté profs)
+static struct requeteEntree* requeteEBP_autres;	// Zone d'une des MPs de <reqsID> (pour Blaise Pascal côté autres)
 
 //------------------------------------------------------ Fonctions privées
 static void fin ( int noSignal )
 // Mode d'emploi :
+//		Handler du signal SIGUSR2
+//
+//		<noSignal>	: le signal reçu
+//
+//		- Fait en sorte d'ignorer le signal SIGCHLD
+//		- Détache toutes les MPs auquelles la tâche était attachée
+//		- Met fin à tous les processus fils de la tâche par l'envoie de SIGUSR2
 //
 // Contrat :
+//		- Ne doit pas être appelé explicitement
 //
 // Algorithme :
-//
+//		Destruction de la tâche par détachement des MPs
+//		Pour chaque fils encore en vie
+//			on signale à ce fils de mourir,
+//			et on attend que ce soit fait
+//		On met fin à la tâche avec le code 0
 {
-	//log << "On a recu le signal de fin" << endl;
-	//log.close();
-	
 	sigaction( SIGCHLD, NULL, NULL );
 	shmdt( nbPlaces );
 	shmdt( parking );
@@ -74,8 +83,7 @@ static void fin ( int noSignal )
 	shmdt( requeteEBP_profs );
 	shmdt( requeteEGB );
 	
-	ListeFilsIterator itr;
-	for ( itr = listeFils.begin( ); itr != listeFils.end(); itr++ )
+	for ( ConstListeFilsIterator itr = listeFils.begin( ); itr != listeFils.end(); itr++ )
 	{
 		kill( *itr, SIGUSR2 );
 		waitpid( *itr, NULL, 0 );
@@ -88,20 +96,40 @@ static void fin ( int noSignal )
 
 static void mortFils ( int noSignal )
 // Mode d'emploi :
+//		Handler du signal SIGCHLD
+//
+//		<noSignal>	: le signal reçu
+//
+//		- Récupère le PIDs et le code de sortie du fils mort,
+//		  et supprime ce dernier de la liste des fils
+//		- Met à jour l'affichage des places de parking
+//		- Met à jour l'affichage de la zone sortie (infos sur la voiture sortie)
+//		- Décrémente le nombre de voitures présentes dans le parking
+//		- Si le parking était plein, parcours les requêtes potentiellement déposées
+//		  par les entrées, et envoie le signal SIGUSR1 à l'entrée la plus prioritaire
 //
 // Contrat :
+//		- Ne doit pas être appelé explicitement
 //
 // Algorithme :
-//
+//		Récupère les informations liées à la mort du fils
+//		Parcours de la liste des fils pour supprimer le fils en question
+//		(NB: std::list::remove pose problème, donc effacement à la main)
+//		Accès aux MPs pour écriture via mutex
+//		Si le parking était plein
+//			On defnie de quoi conserver une trace de la requete la plus prioritaire
+//			On parcourt les MPs de requetes :
+//			Si la requete contient une requete plus prioritaire que celle existante
+//				On met à jour la requete la plus prioritaire
+//			Si au moins une des requêtes était non nulle
+//				On envoie SIGUSR1 à la requête la plus prioritaire
+//		NB: la priorité est telle que décrite dans Sortie.h, pour la fonction Sortie
 {
-	//log << "Un fils est mort" << endl;
 	// Prises des informations liées à la mort du fils
+	time_t heureDepart = time( NULL );
 	int statut;
 	pid_t pidFils = waitpid( -1, &statut, WNOHANG );
-	//log << "Il avait le PID : " << pidFils << endl;
 	int numPlace = WEXITSTATUS(statut);
-	//log << "Il a sortie une voiture de la place " << numPlace << endl;
-	time_t heureDepart = time( NULL );
 	
 	// On recherche le fils mort de la liste des fils
 	ListeFilsIterator itr = listeFils.begin( );
@@ -109,13 +137,11 @@ static void mortFils ( int noSignal )
 	{
 		itr++;
 	}
-	
-	//log << "On a trouvé dans la liste des fils le PID : " << *itr << endl;
-	
+		
 	// Si ce fils existait bel et bien, on le supprime et on fait les traitements associés
+	// (prévient d'éventuels bugs)
 	if( itr != listeFils.end( ) )
 	{
-		//log << "Il existait" << endl;
 		listeFils.erase( itr );
 		
 		// Init sembuf
@@ -136,14 +162,7 @@ static void mortFils ( int noSignal )
 			//		mais cela ne devrait pas mener à un interblocage.
 			semOp.sem_op = 1;
 		semop( semaphoreID, &semOp, 1 );
-		
-		//log << "Done. Maj affichage parking demandée" << endl;
 
-        // Mise à jour de l'affichage du parking
-        //Afficher(ConvertZone(numPlace), "LEAVING");
-		
-		//log << "Done. Maj parking demandée" << endl;
-		
 		// Mise à jour des places de parking
 		semOp.sem_op = -1;
 		while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
@@ -152,9 +171,7 @@ static void mortFils ( int noSignal )
 			parking[numPlace-1].numVoiture = 0;
 			semOp.sem_op = 1;
 		semop( semaphoreID, &semOp, 1 );
-		
-		//log << "Done. Maj nombre place demandée" << endl;
-		
+				
 		// Variables pour envoi potentiel de signal
 		bool envoyerSignal = false;
 		
@@ -169,21 +186,16 @@ static void mortFils ( int noSignal )
 			}
 			semOp.sem_op = 1;
 		semop( semaphoreID, &semOp, 1 );
-			
-		//log << "Done. Doit-on envoyer un signal ? ";
-		
+				
 		// Envoie d'un signal pour débloquer les entrées si nécessaire
 		if( envoyerSignal )
 		{
-			//log << "Oui" << endl;
 			time_t heure = 0;
 			time_t meilleureHeure = 0;
 			enum TypeUsager usager = AUCUN;
 			enum TypeUsager bestUsager = AUCUN;
 			pid_t entreeADebloquer = 0;
-			
-			//log << "Verif requete GB... (" << entreesPID[NUM_PID_ENTREE_GB] << ")" << endl;
-			
+						
 			semOp.sem_op = -1;
 			semOp.sem_num = SEM_REQUETE_GB;
 			while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
@@ -191,9 +203,7 @@ static void mortFils ( int noSignal )
 				meilleureHeure = requeteEGB->heureArrive;
 				semOp.sem_op = 1;
 			semop( semaphoreID, &semOp, 1 );
-			
-			//log << "Done. Verif requete BP profs... (" << entreesPID[NUM_PID_ENTREE_BP_PROFS] << ")" << endl;
-			
+						
 			semOp.sem_op = -1;
 			semOp.sem_num = SEM_REQUETE_BP_PROFS;
 			while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
@@ -206,7 +216,6 @@ static void mortFils ( int noSignal )
 				meilleureHeure = heure;
 				bestUsager = usager;
 				entreeADebloquer = entreesPID[NUM_PID_ENTREE_BP_PROFS];
-				//log << "On choisit BPProfs car prof prio" << endl;
 			}
 			else if( bestUsager == PROF && usager == PROF )
 			{
@@ -214,28 +223,21 @@ static void mortFils ( int noSignal )
 				{
 					meilleureHeure = heure;
 					entreeADebloquer = entreesPID[NUM_PID_ENTREE_BP_PROFS];
-					//log << "On choisit BPProfs car prof avant l'autre" << endl;
 				}
 				else
 				{
 					entreeADebloquer = entreesPID[NUM_PID_ENTREE_GB];
-					//log << "On garde GB car prof avant l'autre" << endl;
 				}
 			}
 			else if( bestUsager == AUCUN && usager == AUCUN)
 			{
 				// Ne rien faire
-				//log << "On ne choisit personne" << endl;
 			}
 			else
 			{
 				entreeADebloquer = entreesPID[NUM_PID_ENTREE_GB];
-				//log << "On choisit GB" << endl;
 			}
-			
-			//log << "entreeADebloquer vaut " << entreeADebloquer << endl;
-			//log << "Done. Verif requete BP autres... (" << entreesPID[NUM_PID_ENTREE_BP_AUTRES] << ")" << endl;
-			
+						
 			semOp.sem_op = -1;
 			semOp.sem_num = SEM_REQUETE_BP_AUTRES;
 			while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
@@ -246,7 +248,6 @@ static void mortFils ( int noSignal )
 			if( bestUsager == PROF  || ( bestUsager == AUCUN && usager == AUCUN ) || usager == AUCUN )
 			{
 				// Ne rien faire
-				//log << "On choisit le precedent" << endl;
 			}
 			else if( bestUsager == AUTRE && usager == AUTRE )
 			{
@@ -254,23 +255,17 @@ static void mortFils ( int noSignal )
 				{
 					meilleureHeure = heure;
 					entreeADebloquer = entreesPID[NUM_PID_ENTREE_BP_AUTRES];
-					//log << "On choisit BPAutres car + en avance" << endl;
 				}
 				else
 				{
 					// On garde le précédent
-					//log << "On choisit le precedent car + en avance" << endl;
 				}
 			}
 			else 
 			{
 				entreeADebloquer = entreesPID[NUM_PID_ENTREE_BP_AUTRES];
-				//log << "On choisit le precedent car + en avance" << endl;
 			}
-			
-			//log << "Done." << endl;
-			//log << "Il faut débloquer l'entrée " << entreeADebloquer << endl;
-			
+						
 			if( entreeADebloquer )
 			{
 				kill( entreeADebloquer, SIGUSR1 );
@@ -285,9 +280,15 @@ static void mortFils ( int noSignal )
 //---------------------------------------------------- Fonctions publiques
 void Sortie( int parkingID, int balID, int nombrePlacesOccupeesID, int* requetesID, int semID, pid_t* entreesID )
 // Algorithme :
-//
+//		Initialisation
+//			Mise à jour des variables globales statiques
+//			Attachement aux MPs
+//			Masquage des signaux SIGUSR2 puis SIGCHLD
+//			Dans une boucle infinie
+//				Attendre qu'un message de type sortie arrive dans la boite aux lettres <balID>
+//				Lancer une tache fille qui va faire sortir la voiture associée au message reçu
+//				Ajouter le PID de la tâche ainsi créer à la liste des fils encore vivants
 {
-	//log.open("sortie.//log");
 	// INITIALISATION
 	// Mise à jour des variables globales
 	parkID = parkingID;
@@ -316,7 +317,6 @@ void Sortie( int parkingID, int balID, int nombrePlacesOccupeesID, int* requetes
 	sigchldAction.sa_flags = 0;
 	sigaction( SIGCHLD, &sigchldAction, NULL );
 	
-	//log << "INIT reussie" << endl;
 	// MOTEUR
 	for( ;; )
 	{
@@ -325,7 +325,6 @@ void Sortie( int parkingID, int balID, int nombrePlacesOccupeesID, int* requetes
 		struct voiture message;
 		while( msgrcv( balID, (void*) &message, sizeof(struct voiture)-sizeof(long), MSG_TYPE_SORTIE, NULL ) == -1 && errno == EINTR );
 		
-		//log << "Un voiture veut sortir ! Elle était à la place : " << message.numPlace << endl;
 		// Lancer la tache qui va faire sortir la voiture
 		unsigned int i;
 		unsigned int numPlace = 0;
@@ -340,7 +339,7 @@ void Sortie( int parkingID, int balID, int nombrePlacesOccupeesID, int* requetes
 	// DESTRUCTION
 	// Via handler de SIGUSR2
 	
-} //----- fin de Nom
+} //----- fin de Sortie
 
 
 

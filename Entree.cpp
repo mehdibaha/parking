@@ -112,7 +112,7 @@ static void garer(Voiture& message)
 			voitureMap.insert(make_pair(pidCourant, message));
 		}
 		
-		sleep(1);
+		sleep(1);	// Pour éviter les collisions à l'entrée !
 		
 		//log << "On a crée une tache pour garer la voiture : " << pidCourant << endl;
 	}
