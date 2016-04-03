@@ -1,24 +1,25 @@
 /*************************************************************************
-                           <Mere>  -  description
+                                      Mere
+				La tâche principale de la simulation de parking
                              -------------------
-    début                : XXX
-    copyright            : (C) XXX par XXX
-    e-mail               : XXX
+    début                : 16/03/2016
+    copyright            : (C) par Ruben
+    e-mail               : ruben.pericas-moya@insa-lyon.fr
 *************************************************************************/
 
 //---------- Réalisation de la tâche <Mere> (fichier Mere.cpp) ---
 
 /////////////////////////////////////////////////////////////////  INCLUDE
 //-------------------------------------------------------- Include système
-#include <sys/unistd.h>
-#include <sys/wait.h>
-#include <sys/msg.h>
-#include <sys/shm.h>
-#include <sys/sem.h>
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <signal.h>
-#include <cstdlib>
+#include <sys/unistd.h>		// sleep, fork
+#include <sys/wait.h>		// waitpid
+#include <sys/msg.h>		// boite aux lettres
+#include <sys/shm.h>		// mémoire partagée
+#include <sys/sem.h>		// sémaphore
+#include <sys/types.h>		// pid_t
+#include <sys/ipc.h>		// flags pour IPCs
+#include <signal.h>			// signaux, sigaction
+#include <cstdlib>			// exit
 
 //------------------------------------------------------ Include personnel
 #include "Mere.h"
@@ -30,47 +31,42 @@
 #include "Config.h"
 
 ///////////////////////////////////////////////////////////////////  PRIVE
-//------------------------------------------------------------- Constantes
-
-//------------------------------------------------------------------ Types
-
-//---------------------------------------------------- Variables statiques
-
 //------------------------------------------------------ Fonctions privées
-static void cleanFin ( int noSignal )
-// Mode d'emploi :
-//
-// Contrat :
-//
-// Algorithme :
-//
-{
-	
-} //----- fin de cleanFin
-
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 int main ( int argc, char ** argv )
 // Algorithme :
-//
+//		INITIALISATION
+//			Création boite aux lettres (1 seule, multifiles)
+//			Création des mémoires partagées
+//			Initialisation du nombre de places occupées à 03/2016
+//			Création d'un sémaphore général (1 seul, constitué de plusieurs élémentaires)
+//			Initialisation de tous les sémaphores élémentaires à 1 (mutex)
+//			Mise en place de l'environnement graphique
+//			Lancement de toutes les autres tâches, dans l'ordre suivant :
+//				* Heure
+//				* Entrées (Gaston Berger, Blaise Pascal profs, Blaise Pascal autres)
+//				* Sortie
+//				* Clavier
+//		MOTEUR
+//			Attente de la fin de la tâche Clavier
+//		DESTRUCTION
+//			Pour chaque tâche parmi celles créées, hormis Clavier, dans l'ordre inverse de création
+//				Envoyer SIGUSR2 à la tâche
+//				Attendre la fin de la tâche
+//			Destruction de tous les IPCs créés dans la phase d'initialisation
+//			Auto-destruction avec le code de retour 0
 {
-	// INITIALISATION
-	// Masquage signal
-	struct sigaction sigintAction;
-	sigintAction.sa_handler = cleanFin;
-	sigemptyset( &sigintAction.sa_mask );
-	sigintAction.sa_flags = 0;
-	sigaction( SIGINT, &sigintAction, NULL );
-	
+	// INITIALISATION	
 	// Boites aux lettres
-	int balID = msgget( ftok(argv[0], 'm'), IPC_CREAT | DROITS_ACCES );
+	int balID = msgget( ftok(argv[argc - 1], 'm'), IPC_CREAT | DROITS_ACCES );
 		// NB :	une seule file de message.
 		//		Le clavier deposera seulement un message de type différent pour le comportement à simuler.
 		//		Les tâches d'entrées/sortie n'attendront qu'un seul type de message.
 	
 	// Mémoire partagée
-	int parkingID = shmget( ftok(argv[0], 'p'), NB_PLACES_PARKING*sizeof(struct placeParking), IPC_CREAT | DROITS_ACCES );
+	int parkingID = shmget( ftok(argv[argc - 1], 'p'), NB_PLACES_PARKING*sizeof(struct placeParking), IPC_CREAT | DROITS_ACCES );
 	int nombrePlacesOccupeesID = shmget( IPC_PRIVATE, sizeof(unsigned int), IPC_CREAT | DROITS_ACCES );
 	int immatriculationID = shmget( IPC_PRIVATE, sizeof(unsigned int), IPC_CREAT | DROITS_ACCES );
 	int requetesID[NB_REQUETES];
@@ -82,9 +78,7 @@ int main ( int argc, char ** argv )
 	int* nbPlaces = (int*) shmat( nombrePlacesOccupeesID, NULL, SHM_R|SHM_W );
 	*nbPlaces = 0;
 	shmdt( nbPlaces );
-	
-	// TODO : init les segments de MP qui ont besoin de l'être
-	
+		
 	// Sémaphores
 	int semID = semget( IPC_PRIVATE, NB_SEGMENTS_A_PROTEGER, IPC_CREAT | DROITS_ACCES );
 	union semun args;
@@ -140,7 +134,6 @@ int main ( int argc, char ** argv )
         waitpid( clavier, NULL, 0 );
 		
 		// DESTRUCTION
-		// TODO :	faire une fonction de destruction
 		kill( sortie, SIGUSR2 );
 		waitpid( sortie, NULL, 0 );
 		kill( entreeAutresBP, SIGUSR2 );

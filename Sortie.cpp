@@ -280,7 +280,7 @@ static void mortFils ( int noSignal )
 //---------------------------------------------------- Fonctions publiques
 void Sortie( int parkingID, int balID, int nombrePlacesOccupeesID, int* requetesID, int semID, pid_t* entreesID )
 // Algorithme :
-//		Initialisation
+//		INITIALISATION
 //			Mise à jour des variables globales statiques
 //			Attachement aux MPs
 //			Masquage des signaux SIGUSR2 puis SIGCHLD
