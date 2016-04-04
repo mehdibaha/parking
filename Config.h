@@ -1,9 +1,10 @@
 /*************************************************************************
-                           config  -  description
+                                    config
+	Configuration de l'application : constantes et structures de données
                              -------------------
-    début                : 
-    copyright            : (C)  par 
-    e-mail               : 
+    début                : 16/03/2016
+    copyright            : (C) par Ruben
+    e-mail               : ruben.pericas-moya@insa-lyon.fr
 *************************************************************************/
 
 //---------- Interface du module <config> (fichier config.h) ---------
@@ -12,7 +13,7 @@
 
 //------------------------------------------------------------------------
 // Rôle du module <config>
-//
+// 
 //
 //------------------------------------------------------------------------
 
