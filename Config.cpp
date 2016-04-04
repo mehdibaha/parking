@@ -1,42 +1,28 @@
 /*************************************************************************
-                           <Config>  -  description
+                                    config
+	Configuration de l'application : constantes et structures de données
+	 Implémentation des fonctions de conversion pour le module graphique
                              -------------------
-    début                : 
-    copyright            : (C) 
-    e-mail               : 
+    début                : 16/03/2016
+    copyright            : (C) par Ruben
+    e-mail               : ruben.pericas-moya@insa-lyon.fr
 *************************************************************************/
 
 //---------- Réalisation du module <Config> (fichier Config.cpp) -----
 
 /////////////////////////////////////////////////////////////////  INCLUDE
 //-------------------------------------------------------- Include système
+#include <ctime>
 
 //------------------------------------------------------ Include personnel
 #include "Config.h"
-
-///////////////////////////////////////////////////////////////////  PRIVE
-//------------------------------------------------------------- Constantes
-
-//------------------------------------------------------------------ Types
-
-//---------------------------------------------------- Variables statiques
-
-//------------------------------------------------------ Fonctions privées
-//static type nom ( liste de paramètres )
-// Mode d'emploi :
-//
-// Contrat :
-//
-// Algorithme :
-//
-//{
-//} //----- fin de nom
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 TypeZone ConvertPlaceToZone(int numPlace)
 // Algorithme :
-//
+//		Switch basique :
+//			Association de <numPlace> à la TypeZone correspondante.
 {
     TypeZone typeZone;
     switch(numPlace)
@@ -69,11 +55,12 @@ TypeZone ConvertPlaceToZone(int numPlace)
             break;
     }
     return typeZone;
-} //----- fin de convertZone
+} //----- fin de ConvertPlaceToZone
 
 TypeZone ConvertNumSemToZone(int numSem)
 // Algorithme :
-//
+//		Switch basique :
+//			Association de <numSem> à la TypeZone correspondante.
 {
 	TypeZone typeZone;
     switch(numSem)
@@ -91,5 +78,5 @@ TypeZone ConvertNumSemToZone(int numSem)
             break;
     }
     return typeZone;
-} //----- fin de convertZone
+} //----- fin de ConvertNumSemToZone
 

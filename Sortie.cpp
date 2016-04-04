@@ -12,18 +12,15 @@
 /////////////////////////////////////////////////////////////////  INCLUDE
 //-------------------------------------------------------- Include système
 using namespace std;
-#include <cstdlib>
-#include <errno.h>
-#include <signal.h>
-#include <sys/msg.h>
-#include <sys/shm.h>
-#include <sys/wait.h>
-#include <sys/sem.h>
-#include <list>
-#include <ctime>
-
-// Debug
-#include <fstream>
+#include <cstdlib>			// exit
+#include <errno.h>			// pour connaitre la valeur de errno
+#include <signal.h>			// signaux, sigaction
+#include <sys/msg.h>		// boite aux lettres
+#include <sys/shm.h>		// mémoire partagée
+#include <sys/wait.h>		// waitpid
+#include <sys/sem.h>		// sémaphore
+#include <list>				// pour stocker les PIDs des tâches filles
+#include <ctime>			// pour connaitre l'heure d'arrivée
 
 //------------------------------------------------------ Include personnel
 #include "Sortie.h"
@@ -150,13 +147,11 @@ static void mortFils ( int noSignal )
 		semOp.sem_op = -1;
 		semOp.sem_flg = NULL;
 		
-		//log << "Sembuf init... Demande affichage sortie (via valeurs de parking)" << endl;
-		//log << "Le semaphore vaut : " << semctl(semaphoreID, SEM_PARKING, GETVAL, NULL) << endl;
+		// Mise à jour de l'affichage de l'état des places de parking
 		Effacer(ConvertPlaceToZone(numPlace));
 		
 		// Mise à jour de l'affichage de la sortie
 		while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
-			//log << "Autorisation donnée par le sémaphore" << endl;
 			AfficherSortie( parking[numPlace-1].usager, parking[numPlace-1].numVoiture, parking[numPlace-1].heureArrive, heureDepart );
 			// NB : on dispose d'une ressource et on en demande une autre via AfficherSortie,
 			//		mais cela ne devrait pas mener à un interblocage.
@@ -166,7 +161,6 @@ static void mortFils ( int noSignal )
 		// Mise à jour des places de parking
 		semOp.sem_op = -1;
 		while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
-			//log << "Autorisation donnée par le sémaphore" << endl;
 			parking[numPlace-1].usager = AUCUN;
 			parking[numPlace-1].numVoiture = 0;
 			semOp.sem_op = 1;
@@ -179,7 +173,6 @@ static void mortFils ( int noSignal )
 		semOp.sem_op = -1;
 		semOp.sem_num = SEM_COMPTEUR;
 		while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
-			//log << "Autorisation donnée par le sémaphore" << endl;
 			if(--(*nbPlaces) == NB_PLACES_PARKING-1)
 			{
 				envoyerSignal = true;
