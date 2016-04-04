@@ -292,11 +292,11 @@ void Sortie( int parkingID, int balID, int nombrePlacesOccupeesID, int* requetes
 	entreesPID = entreesID;
 	
 	// Attachement aux mps
-	requeteEGB = (requeteEntree*) shmat( requetesID[REQ_GB], NULL, NULL );
-	requeteEBP_profs = (requeteEntree*) shmat( requetesID[REQ_BP_PROFS], NULL, NULL );
-	requeteEBP_autres = (requeteEntree*) shmat( requetesID[REQ_BP_AUTRES], NULL, NULL );
-	parking = (placeParking*) shmat( parkingID, NULL, NULL );
-	nbPlaces = (int*) shmat( nombrePlacesOccupeesID, NULL, NULL );
+	requeteEGB = (requeteEntree*) shmat( requetesID[REQ_GB], NULL, SHM_R );
+	requeteEBP_profs = (requeteEntree*) shmat( requetesID[REQ_BP_PROFS], NULL, SHM_R );
+	requeteEBP_autres = (requeteEntree*) shmat( requetesID[REQ_BP_AUTRES], NULL, SHM_R );
+	parking = (placeParking*) shmat( parkingID, NULL, SHM_R|SHM_W );
+	nbPlaces = (int*) shmat( nombrePlacesOccupeesID, NULL, SHM_R|SHM_W );
 	
 	// Masquage signal
 	struct sigaction sigusr2Action;
