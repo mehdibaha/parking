@@ -51,7 +51,7 @@ const unsigned int SEM_REQUETE_BP_PROFS = 4;
 const unsigned int SEM_REQUETE_BP_AUTRES = 5;
 const unsigned int SEM_IMMATRICULATION = 6;
 
-#define DROITS_ACCES 0777
+#define DROITS_ACCES 0660
 
 //------------------------------------------------------------------ Types
 struct voiture
