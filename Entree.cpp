@@ -149,7 +149,7 @@ static void garer(Voiture& message)
 
 static void placeLibre( int noSignal )
 // Mode d'emploi :
-// Permet la gestion d
+// Gère le signal SIGUSR1
 {
 	// SIGUSR1 reçu
 	// Init sembuf
