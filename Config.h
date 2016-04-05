@@ -24,32 +24,32 @@
 #include "Outils.h"
 
 //------------------------------------------------------------- Constantes
-#define NB_PLACES_PARKING 8
-#define NB_ENTREES 3
-#define NB_REQUETES 3
-#define NB_SEGMENTS_A_PROTEGER 7
-#define NB_VOITURES_MAX 999
+const unsigned int NB_PLACES_PARKING = 8;
+const unsigned int NB_ENTREES = 3;
+const unsigned int NB_REQUETES = 3;
+const unsigned int NB_SEGMENTS_A_PROTEGER = 7;
+const unsigned int NB_VOITURES_MAX = 999;
 
-#define NUM_PID_ENTREE_GB 0
-#define NUM_PID_ENTREE_BP_PROFS 1
-#define NUM_PID_ENTREE_BP_AUTRES 2
+const unsigned int NUM_PID_ENTREE_GB = 0;
+const unsigned int NUM_PID_ENTREE_BP_PROFS = 1;
+const unsigned int NUM_PID_ENTREE_BP_AUTRES = 2;
 
-#define REQ_GB 0
-#define REQ_BP_PROFS 1
-#define REQ_BP_AUTRES 2
+const unsigned int REQ_GB = 0;
+const unsigned int REQ_BP_PROFS =  1;
+const unsigned int REQ_BP_AUTRES = 2;
 
-#define MSG_TYPE_ENTREE_GB 1
-#define MSG_TYPE_ENTREE_BP_PROFS 2
-#define MSG_TYPE_ENTREE_BP_AUTRES 3
-#define MSG_TYPE_SORTIE 4
+const unsigned int MSG_TYPE_ENTREE_GB = 1;
+const unsigned int MSG_TYPE_ENTREE_BP_PROFS = 2;
+const unsigned int MSG_TYPE_ENTREE_BP_AUTRES = 3;
+const unsigned int MSG_TYPE_SORTIE = 4;
 
-#define SEM_PARKING 0
-#define SEM_COMPTEUR 1
-#define SEM_NB_PLACES_OCCUPEES 2
-#define SEM_REQUETE_GB 3
-#define SEM_REQUETE_BP_PROFS 4
-#define SEM_REQUETE_BP_AUTRES 5
-#define SEM_IMMATRICULATION 6
+const unsigned int SEM_PARKING = 0;
+const unsigned int SEM_COMPTEUR = 1;
+const unsigned int SEM_NB_PLACES_OCCUPEES = 2;
+const unsigned int SEM_REQUETE_GB = 3;
+const unsigned int SEM_REQUETE_BP_PROFS = 4;
+const unsigned int SEM_REQUETE_BP_AUTRES = 5;
+const unsigned int SEM_IMMATRICULATION = 6;
 
 #define DROITS_ACCES 0777
 
