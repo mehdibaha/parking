@@ -1,4 +1,4 @@
-/*************************************************************************
+﻿/*************************************************************************
                                     config
 	Configuration de l'application : constantes et structures de données
 	 Implémentation des fonctions de conversion pour le module graphique

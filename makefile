@@ -1,4 +1,4 @@
-COMP = g++
+﻿COMP = g++
 EDL = g++
 RM = rm
 EXE = parking
