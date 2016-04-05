@@ -1,9 +1,9 @@
 /*************************************************************************
                            <Clavier>  -  description
                              -------------------
-    début                : XXX
-    copyright            : (C) XXX par XXX
-    e-mail               : XXX
+    début                : 2016
+    copyright            : 2015-2016 (C) par Mehdi Baha, Ruben Pericas-Moya
+    e-mail               : el-mehdi.baha@insa-lyon.fr, ruben.pericas-moya@insa-lyon.fr
 *************************************************************************/
 
 //---------- Réalisation de la tâche <Clavier> (fichier Clavier.cpp) ---
@@ -21,8 +21,6 @@
 
 ///////////////////////////////////////////////////////////////////  PRIVE
 //------------------------------------------------------------- Constantes
-//TODO :	va y avoir besoin de faire des globaux pour stocker ce que prend
-//			Clavier() en parametre, pour que Commande() puisse les utiliser
 
 //------------------------------------------------------------------ Types
 typedef struct voiture Voiture;
@@ -36,7 +34,7 @@ static int boiteID;
 static Voiture creerVoiture ( TypeUsager typeUsager, long valeur, bool entree )
 // Mode d'emploi :
 // Construit et initialise une structure de type Voiture
-// TODO : expliquer la semantique differente de valeur, et p-e renommer
+// Voir Config.h pour utiliser le paramètre valeur
 {
 	Voiture voiture;
 	voiture.usager = typeUsager;
@@ -68,31 +66,31 @@ void Clavier ( int balID )
 }
 
 void Commande ( char code, unsigned int valeur )
-// Algorithme :
-//
 {
 	Voiture voiture;
     switch( code )
 	{
 		case 'E':
 		case 'e':
+			// Fin de l'application
 			exit( 0 );
 		case 'P':
 		case 'p':
+			// Arrivée d'un prof
 			voiture = creerVoiture(TypeUsager::PROF, valeur, true);
 			voiture.type = valeur == 1 ? MSG_TYPE_ENTREE_BP_PROFS : MSG_TYPE_ENTREE_GB;
 			msgsnd( boiteID, &voiture, sizeof(Voiture)-sizeof(long), NULL );
 			break;
-			// NB :	une seule boite mais plusieurs files, suffit de mettre la bonne valeur de
-			//		long type (voir config .h, dans les #define)
 		case 'A':
 		case 'a':
+			// Arrivée d'un "autre"
 			voiture = creerVoiture(TypeUsager::AUTRE, valeur, true);
 			voiture.type = valeur == 1 ? MSG_TYPE_ENTREE_BP_AUTRES : MSG_TYPE_ENTREE_GB;
 			msgsnd( boiteID, &voiture, sizeof(Voiture)-sizeof(long), NULL );
 			break;
 		case 'S':
 		case 's':
+			// Sortie d'une voiture quelquonque
 			voiture = creerVoiture(TypeUsager::AUTRE, valeur, false);
 			voiture.type = MSG_TYPE_SORTIE;
 			msgsnd( boiteID, &voiture, sizeof(Voiture)-sizeof(long), NULL );

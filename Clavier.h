@@ -1,9 +1,9 @@
 /*************************************************************************
                            <Clavier>  -  description
                              -------------------
-    début                : XXX
-    copyright            : (C) XXX par XXX
-    e-mail               : XXX
+    début                : 2016
+    copyright            : 2015-2016 (C) par Mehdi Baha, Ruben Pericas-Moya
+    e-mail               : el-mehdi.baha@insa-lyon.fr, ruben.pericas-moya@insa-lyon.fr
 *************************************************************************/
 
 //---------- Interface de la tâche <Clavier> (fichier Clavier.h) -------
@@ -27,16 +27,7 @@
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 void Clavier( int balID );
-// TODO : verifier qu'il ne faut rien passer d'autre en parametres
-// Mode d'emploi :
-//
-// Contrat :
-//
 
 void Commande(char code, unsigned int valeur);
-// Mode d'emploi :
-// 
-// Contrat :
-//
 
 #endif // XXX_H

@@ -1,9 +1,9 @@
 /*************************************************************************
                            Entree  -  description
                              -------------------
-    début                :
-    copyright            : (C) par
-    e-mail               :
+    début                : 2016
+    copyright            : 2015-2016 (C) par Mehdi Baha, Ruben Pericas-Moya
+    e-mail               : el-mehdi.baha@insa-lyon.fr, ruben.pericas-moya@insa-lyon.fr
 *************************************************************************/
 
 //---------- Réalisation de la tâche <Entree> (fichier Entree.cpp) ---
@@ -64,6 +64,9 @@ static ofstream log;
 
 //------------------------------------------------------ Fonctions privées
 static void garer(Voiture& message)
+// Mode d'emploi :
+// Permet de gérer l'arrivée d'une voiture de l'entrée à sa place,
+// à partir du message d'entrée de la voiture
 {
 	TypeBarriere typeBarriere;
 	switch(typeBar)
@@ -87,20 +90,17 @@ static void garer(Voiture& message)
 	{
 		DessinerVoitureBarriere(typeBarriere, message.usager);
 	}
-	// Bah oui, sinon, on la redessine
 		
-	//log << "Voiture dessinée" << endl;
-	// TODO : heu, lecture d'une MP ligne en dessous... mutex ?
 	if (*nbPlaces < NB_PLACES_PARKING)
 	{
-		//log << "Il y a de la place" << endl;
-		
-		// Init sembuf
+        // Il y a de la place   	
+        // Initialisation semaphore nbPlacesOccupees
 		struct sembuf semOp;
 		semOp.sem_op = -1;
 		semOp.sem_num = SEM_NB_PLACES_OCCUPEES;
 		semOp.sem_flg = NULL;
-		// Mise à jour du nombre de places occupées
+		
+        // Mise à jour du nombre de places occupées
 		while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
 			(*nbPlaces)++;
 			semOp.sem_op = 1;
@@ -109,18 +109,19 @@ static void garer(Voiture& message)
 		pid_t pidCourant = GarerVoiture(typeBarriere);
 		if (pidCourant != -1)
 		{
+            // Ajout de la voiture dans la structure
 			voitureMap.insert(make_pair(pidCourant, message));
 		}
 		
-		sleep(1);	// Pour éviter les collisions à l'entrée !
+		sleep(1);	// On évite les collisions
 		
-		//log << "On a crée une tache pour garer la voiture : " << pidCourant << endl;
+		// Créaton d'une tâche pour créer la voiture
 	}
 	else
 	{
-		//log << "Il n'y avait pas de place"  << endl;
+		// Il n'y a pas de place
 		msg = message;
-		// Init sembuf
+		// Initialisation semaphore pour les requêtes
 		struct sembuf semOp;
 		semOp.sem_op = -1;
 		semOp.sem_num = numSemReq;
@@ -135,26 +136,22 @@ static void garer(Voiture& message)
 		
 		AfficherRequete(typeBarriere, req->usager, req->heureArrive);
 		
-		//log << "Requete mise à jour, attente de SIGUSR1..." << endl;
+		// On temporise juqu'à l'arrivée d'un signal SIGUSR1
 		do
 		{
-			pause();	// On s'endort jusqu'à ce qu'on recoive un signal
+			pause();
 		} while( signalRecu != SIGUSR1 );
-		//log << "On est sorti de la pause !" << endl;
 		signalRecu = 0;
 		// NB :		do-while pour éviter de faire quelque chose si on a recu autre chose que sigusr1
 		
 	}
-}
-// TODO :	Lorsque Entree est coincée parcequ'il n'y a plus de places dans le parking,
-//			c'est sortie qui la débloque en lui envoyant un signal SIGUSR1.
-//			Il faut donc handle ce signal
-//			Attention il va y avoir des variables à remettre à jour (par exemple la MP de requete)
+} //----- fin de garer
+
 static void placeLibre( int noSignal )
 // Mode d'emploi :
-//
+// Permet la gestion d
 {
-	//log << "ON A RECU SIGUR1" << endl;
+	// SIGUSR1 reçu
 	// Init sembuf
 	struct sembuf semOp;
 	semOp.sem_op = -1;
@@ -166,20 +163,19 @@ static void placeLibre( int noSignal )
 		semOp.sem_op = 1;
 	semop( semaphoreID, &semOp, 1 );
 	
-	// Effacement ecran requete
+	// Effacement écran requete
 	Effacer( ConvertNumSemToZone( numSemReq ) );
 	
 	signalRecu = noSignal;
 	garer(msg);
-}
+} //----- fin de placeLibre
 
 
 static void fin ( int noSignal )
 // Mode d'emploi :
-//
+// Met fin à la tâche principale
 {
-	//log << "On a recu le signal de fin" << endl;
-	//log.close();
+	// Réception signal de fin
     sigaction( SIGCHLD, NULL, NULL );
 	sigaction( SIGUSR1, NULL, NULL );
 	sigaction( SIGUSR2, NULL, NULL );
@@ -189,6 +185,7 @@ static void fin ( int noSignal )
     shmdt( req );
     shmdt( immatriculation );
 
+    // On kill toutes les tâches liées aux voitures présentes
     for ( auto itr = voitureMap.begin( ); itr != voitureMap.end(); itr++ )
     {
         kill( itr->first, SIGUSR2 );
@@ -196,26 +193,15 @@ static void fin ( int noSignal )
     }
 
     exit(0);
-    // TODO FAIT ?
 } //----- fin de fin
 
 static void mortFils ( int noSignal )
 // Mode d'emploi :
-// TODO : Récupérer immatriculation et tout
-// TODO :	la mort d'un fils, ça veut dire quoi ? ca veut dire qu'une voiture s'est effectivement garée.
-//			Il faut donc :
-//				-> Mettre à jour l'affichage
-//				-> Mettre à jour le tableaux des places de parking
-//				-> Mettre à jour le nombre de voitures présentes
-//				(ordre à vérifier)
-//			Pas besoin d'envoyer un signal
-// TODO FAIT ?
+// Gère l'arrivée d'une voiture (mort fils correspond à l'appel Mere de Garer)
 {
-	//log << "Un fils est mort : ";
     // Prises des informations liées à la mort du fils
     int statut;
     pid_t pidFils = waitpid( -1, &statut, WNOHANG );
-	//log << pidFils << endl;
     int numPlace = WEXITSTATUS(statut);
     time_t heureEntree = time( NULL );
 
@@ -224,14 +210,7 @@ static void mortFils ( int noSignal )
     // Si ce fils existait bel et bien, on le supprime et on fait les traitements associés
     if( itr != voitureMap.end( ) )
     {
-		//log << "Ce fils était connu" << endl;
-		//log << "Il a garé la voiture à la place " << numPlace << endl;
         Voiture v = itr->second;
-		
-		//log << "Cette voiture :" << endl;
-		//log << "-> Est arrivée à " << heureEntree << endl;
-		//log << "-> A le numéro " << v.numVoiture << endl;
-		//log << "-> Appartient à un usager de type " << v.usager << endl;
 		
         // Init sembuf
         struct sembuf semOp;
@@ -239,8 +218,6 @@ static void mortFils ( int noSignal )
         semOp.sem_op = -1;
         semOp.sem_flg = NULL;
 		
-		//log << "SemBuf init... Demande maj parking" << endl;
-		//log << "Le sémaphore a une valeur de " << semctl(semaphoreID, SEM_PARKING, GETVAL, NULL) << endl;
         // Mise à jour des places de parking
         while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
 			parking[numPlace-1].heureArrive = heureEntree;
@@ -249,50 +226,37 @@ static void mortFils ( int noSignal )
 			semOp.sem_op = 1;
         semop( semaphoreID, &semOp, 1 );
 
-		//log << "Done. Maj affichage entree" << endl;
 		// Mise à jour de l'affichage de l'entrée
 		AfficherPlace( numPlace, v.usager, v.numVoiture, v.heureArrive );
 
-		//log << "Done. Maj affichage parking" << endl;
 		// Mise à jour de l'affichage du parking
-		//Afficher(ConvertZone(numPlace), "ENTERING");
-
         voitureMap.erase( itr );
-		
-		//log << "Fin du handler se SIGCHLD..." << endl;
-		//log << "Au passage, errno vaut : " << errno << endl;
     }
 
 } //----- fin de mortFils
 
 static void moteur( long type )
 // Mode d'emploi :
-//
+// Bloque jusqu'à l'arrivée d'un message d'entrée d'une voiture
 {
-	//log << "Phase MOTEUR..." << endl;
     Voiture message;
-	//log << "Struct voiture cree" << endl;
 
 	for( ;; )
 	{
-		//log << "In INIFINITE LOOP - waiting for a car to arrive" << endl;
+		// On attend qu'une voiture arrive
 		while( msgrcv( boiteID, (void*) &message, sizeof(struct voiture)-sizeof(long), type, NULL ) == -1 && errno == EINTR );
-
-		//log << "Une voiture est arrivée" << endl;
-		//log << "Il y a " << *nbPlaces << " places occupees" << endl;
 		
-		// Lancer la tâche qui va faire rentrer la voiture
+		// Lancement la tâche qui va faire rentrer la voiture
 		garer(message);
 		
 	}
-	//log << "On est sorti de la boucle infinie !! :o"  << endl;
 } //----- fin de moteur
 
 static void init( )
 // Mode d'emploi :
-//
+// Initialisation de l'application
 {
-    // Attachement aux mps
+    // Attachement aux mémoires partagées
     parking = (placeParking*) shmat( parkID, NULL, NULL );
     nbPlaces = (int*) shmat( nbPlacesID, NULL, NULL );
     req = (requeteEntree*) shmat( reqID, NULL, NULL );
@@ -318,16 +282,14 @@ static void init( )
     sigemptyset( &sigchldAction.sa_mask );
     sigchldAction.sa_flags = 0;
     sigaction( SIGCHLD, &sigchldAction, NULL );
-} //----- fin de moteur
+} //----- fin de init
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
 void Entree( int balID, int parkingID, int immatriculationID, int nombrePlacesOccupeesID,
                 int requeteID, int semID, int numSemRequete, long type )
-{
-	//log.open("entree.//log");
-	
-	// Init globaux privés
+{	
+	// Initialisation des globaux privés
 	boiteID = balID;
 	parkID = parkingID;
 	immatID = immatriculationID;
@@ -337,25 +299,10 @@ void Entree( int balID, int parkingID, int immatriculationID, int nombrePlacesOc
 	numSemReq = numSemRequete;
 	typeBar = type;
 	
-	//log << "INIT globaux OK" << endl;
-	
-	
-	
 	// Phase d'INITIALISATION
     init( );
-	
-	//log << "Phase INIT OK" << endl;
 
 	// Phase MOTEUR
     moteur( type );
-
-	// TODO :	phase moteur
-	//			On est planté devant la boite aux lettres : on attend qu'une voiture arrive
-	//			Si c'est le cas, on vérifie le nombre de places dispos
-	//			Si il y a de la place, on l'envoit se garer et on garde une trace du PID fils pour arret forcé de l'appli,
-	//			(et on pose une requete ? à vérifier, j'ai un doute d'un seul coup)
-	//			Sinon, on dépose une requête et on attend SIGUSR1 (dodo)
-	//			Ensuite on se replante devant la boite.
-
 } //----- fin de Entree
 

@@ -1,9 +1,9 @@
 /*************************************************************************
                            Entree  -  description
                              -------------------
-    début                : 
-    copyright            : (C)  par 
-    e-mail               : 
+    début                : 2016
+    copyright            : 2015-2016 (C) par Mehdi Baha, Ruben Pericas-Moya
+    e-mail               : el-mehdi.baha@insa-lyon.fr, ruben.pericas-moya@insa-lyon.fr
 *************************************************************************/
 
 //---------- Interface de la tâche <Entree> (fichier Entree.h) -------
@@ -27,12 +27,6 @@
 //---------------------------------------------------- Fonctions publiques
 void Entree( int balID, int parkingID, int immatriculationID, int nombrePlacesOccupeesID,
 				int requeteID, int semID, int numSemRequete, long type );
-// TODO :	il va très certainement falloir passer en parametre le type de message à envoyer.
-//			On ne peut pas le mettre en brut ici, car toutes les entrees vont partager le meme code.
-// Mode d'emploi :
-//
-// Contrat :
-//
 
 #endif // ENTREE_H
 
