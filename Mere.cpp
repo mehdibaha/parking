@@ -150,7 +150,7 @@ int main ( int argc, char ** argv )
 		{
 			shmctl( requetesID[i], IPC_RMID, NULL );
 		}
-		semctl( semID, IPC_RMID, NULL );
+		semctl( semID, IPC_RMID, 0 );
 		
 		TerminerApplication( );
 		

@@ -79,21 +79,21 @@ void Commande ( char code, unsigned int valeur )
 			// Arrivée d'un prof
 			voiture = creerVoiture(TypeUsager::PROF, valeur, true);
 			voiture.type = valeur == 1 ? MSG_TYPE_ENTREE_BP_PROFS : MSG_TYPE_ENTREE_GB;
-			msgsnd( boiteID, &voiture, sizeof(Voiture)-sizeof(long), NULL );
+			msgsnd( boiteID, &voiture, sizeof(Voiture)-sizeof(long), 0 );
 			break;
 		case 'A':
 		case 'a':
 			// Arrivée d'un "autre"
 			voiture = creerVoiture(TypeUsager::AUTRE, valeur, true);
 			voiture.type = valeur == 1 ? MSG_TYPE_ENTREE_BP_AUTRES : MSG_TYPE_ENTREE_GB;
-			msgsnd( boiteID, &voiture, sizeof(Voiture)-sizeof(long), NULL );
+			msgsnd( boiteID, &voiture, sizeof(Voiture)-sizeof(long), 0 );
 			break;
 		case 'S':
 		case 's':
 			// Sortie d'une voiture quelquonque
 			voiture = creerVoiture(TypeUsager::AUTRE, valeur, false);
 			voiture.type = MSG_TYPE_SORTIE;
-			msgsnd( boiteID, &voiture, sizeof(Voiture)-sizeof(long), NULL );
+			msgsnd( boiteID, &voiture, sizeof(Voiture)-sizeof(long), 0 );
 			break;
 		default:
 			break;

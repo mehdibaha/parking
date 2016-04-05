@@ -98,7 +98,7 @@ static void garer(Voiture& message)
 		struct sembuf semOp;
 		semOp.sem_op = -1;
 		semOp.sem_num = SEM_NB_PLACES_OCCUPEES;
-		semOp.sem_flg = NULL;
+		semOp.sem_flg = 0;
 		
         // Mise à jour du nombre de places occupées
 		while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
@@ -125,7 +125,7 @@ static void garer(Voiture& message)
 		struct sembuf semOp;
 		semOp.sem_op = -1;
 		semOp.sem_num = numSemReq;
-		semOp.sem_flg = NULL;
+		semOp.sem_flg = 0;
 		// Mise à jour de la requete
 		while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
 			req->numVoiture = msg.numVoiture;
@@ -156,7 +156,7 @@ static void placeLibre( int noSignal )
 	struct sembuf semOp;
 	semOp.sem_op = -1;
 	semOp.sem_num = numSemReq;
-	semOp.sem_flg = NULL;
+	semOp.sem_flg = 0;
 	// Mise à jour de la requete
 	while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
 		req->usager = AUCUN;
@@ -216,7 +216,7 @@ static void mortFils ( int noSignal )
         struct sembuf semOp;
         semOp.sem_num = SEM_PARKING;
         semOp.sem_op = -1;
-        semOp.sem_flg = NULL;
+        semOp.sem_flg = 0;
 		
         // Mise à jour des places de parking
         while( semop( semaphoreID, &semOp, 1 ) == -1 && errno == EINTR );
@@ -244,7 +244,7 @@ static void moteur( long type )
 	for( ;; )
 	{
 		// On attend qu'une voiture arrive
-		while( msgrcv( boiteID, (void*) &message, sizeof(struct voiture)-sizeof(long), type, NULL ) == -1 && errno == EINTR );
+		while( msgrcv( boiteID, (void*) &message, sizeof(struct voiture)-sizeof(long), type, 0 ) == -1 && errno == EINTR );
 		
 		// Lancement la tâche qui va faire rentrer la voiture
 		garer(message);
@@ -257,10 +257,10 @@ static void init( )
 // Initialisation de l'application
 {
     // Attachement aux mémoires partagées
-    parking = (placeParking*) shmat( parkID, NULL, NULL );
-    nbPlaces = (int*) shmat( nbPlacesID, NULL, NULL );
-    req = (requeteEntree*) shmat( reqID, NULL, NULL );
-	immatriculation = (int*) shmat( immatID, NULL, NULL );
+    parking = (placeParking*) shmat( parkID, NULL, 0 );
+    nbPlaces = (int*) shmat( nbPlacesID, NULL, 0 );
+    req = (requeteEntree*) shmat( reqID, NULL, 0 );
+	immatriculation = (int*) shmat( immatID, NULL, 0 );
 	
 	// Armer SIGUSR1 sur placeLibre
 	struct sigaction sigusr1Action;

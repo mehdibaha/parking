@@ -145,7 +145,7 @@ static void mortFils ( int noSignal )
 		struct sembuf semOp;
 		semOp.sem_num = SEM_PARKING;
 		semOp.sem_op = -1;
-		semOp.sem_flg = NULL;
+		semOp.sem_flg = 0;
 		
 		// Mise à jour de l'affichage de l'état des places de parking
 		Effacer(ConvertPlaceToZone(numPlace));
@@ -316,12 +316,9 @@ void Sortie( int parkingID, int balID, int nombrePlacesOccupeesID, int* requetes
 	{
 		// Attendre devant la boite aux lettres
 		struct voiture message;
-		while( msgrcv( balID, (void*) &message, sizeof(struct voiture)-sizeof(long), MSG_TYPE_SORTIE, NULL ) == -1 && errno == EINTR );
+		while( msgrcv( balID, (void*) &message, sizeof(struct voiture)-sizeof(long), MSG_TYPE_SORTIE, 0 ) == -1 && errno == EINTR );
 		
-		// Lancer la tache qui va faire sortir la voiture
-		unsigned int i;
-		unsigned int numPlace = 0;
-		
+		// Lancer la tache qui va faire sortir la voiture		
 		pid_t voiturier = SortirVoiture( message.numPlace );
 		if( voiturier != -1 )
 		{
