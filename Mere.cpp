@@ -65,9 +65,8 @@ int main ( int argc, char ** argv )
 	// Mémoire partagée
 	int parkingID = shmget( ftok(argv[argc - 1], 'p'), NB_PLACES_PARKING*sizeof(struct placeParking), IPC_CREAT | DROITS_ACCES );
 	int nombrePlacesOccupeesID = shmget( IPC_PRIVATE, sizeof(unsigned int), IPC_CREAT | DROITS_ACCES );
-	int immatriculationID = shmget( IPC_PRIVATE, sizeof(unsigned int), IPC_CREAT | DROITS_ACCES );
 	int requetesID[NB_REQUETES];
-	for( int i = 0; i<NB_REQUETES; i++ )
+	for( unsigned int i = 0; i<NB_REQUETES; i++ )
 	{
 		requetesID[i] = shmget( IPC_PRIVATE, sizeof(struct requeteEntree), IPC_CREAT | DROITS_ACCES );
 	}
@@ -102,15 +101,15 @@ int main ( int argc, char ** argv )
 	
     if( ( entreeGB = fork( ) ) == 0 )
     {
-        Entree( balID, parkingID, immatriculationID, nombrePlacesOccupeesID, requetesID[REQ_GB], semID, SEM_REQUETE_GB, MSG_TYPE_ENTREE_GB );
+        Entree( balID, parkingID, nombrePlacesOccupeesID, requetesID[REQ_GB], semID, SEM_REQUETE_GB, MSG_TYPE_ENTREE_GB );
     }
 	else if( ( entreeProfsBP = fork( ) ) == 0 )
 	{
-		Entree( balID, parkingID, immatriculationID, nombrePlacesOccupeesID, requetesID[REQ_BP_PROFS], semID, SEM_REQUETE_BP_PROFS, MSG_TYPE_ENTREE_BP_PROFS );
+		Entree( balID, parkingID, nombrePlacesOccupeesID, requetesID[REQ_BP_PROFS], semID, SEM_REQUETE_BP_PROFS, MSG_TYPE_ENTREE_BP_PROFS );
 	}
 	else if( ( entreeAutresBP = fork( ) ) == 0 )
 	{
-		Entree( balID, parkingID, immatriculationID, nombrePlacesOccupeesID, requetesID[REQ_BP_AUTRES], semID, SEM_REQUETE_BP_AUTRES, MSG_TYPE_ENTREE_BP_AUTRES );
+		Entree( balID, parkingID, nombrePlacesOccupeesID, requetesID[REQ_BP_AUTRES], semID, SEM_REQUETE_BP_AUTRES, MSG_TYPE_ENTREE_BP_AUTRES );
 	}
 	else if( ( sortie = fork( ) ) == 0 )
 	{
@@ -145,8 +144,7 @@ int main ( int argc, char ** argv )
 		msgctl( balID, IPC_RMID, NULL );
 		shmctl( parkingID, IPC_RMID, NULL );
 		shmctl( nombrePlacesOccupeesID, IPC_RMID, NULL );
-		shmctl( immatriculationID, IPC_RMID, NULL );
-		for( int i = 0; i<NB_REQUETES; i++ )
+		for( unsigned int i = 0; i<NB_REQUETES; i++ )
 		{
 			shmctl( requetesID[i], IPC_RMID, NULL );
 		}

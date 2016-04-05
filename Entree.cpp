@@ -42,15 +42,13 @@ typedef struct requeteEntree RequeteEntree;
 //---------------------------------------------------- Variables statiques
 static int boiteID;
 static int parkID;
-static int immatID;
 static int nbPlacesID;
 static int reqID;
 static int semaphoreID;
 static int numSemReq;
 
 static struct placeParking* parking;
-static int* immatriculation;
-static int* nbPlaces;
+static unsigned int* nbPlaces;
 struct requeteEntree* req;
 
 static map<pid_t,Voiture> voitureMap;
@@ -188,7 +186,6 @@ static void fin ( int noSignal )
 	shmdt( parking );
     shmdt( nbPlaces );
     shmdt( req );
-    shmdt( immatriculation );
 
     // On kill toutes les tâches liées aux voitures présentes
     for ( auto itr = voitureMap.begin( ); itr != voitureMap.end(); itr++ )
@@ -267,9 +264,8 @@ static void init( )
 {
     // Attachement aux mémoires partagées
     parking = (placeParking*) shmat( parkID, NULL, 0 );
-    nbPlaces = (int*) shmat( nbPlacesID, NULL, 0 );
+    nbPlaces = (unsigned int*) shmat( nbPlacesID, NULL, 0 );
     req = (requeteEntree*) shmat( reqID, NULL, 0 );
-	immatriculation = (int*) shmat( immatID, NULL, 0 );
 	
 	// Armer SIGUSR1 sur placeLibre
 	struct sigaction sigusr1Action;
@@ -295,13 +291,12 @@ static void init( )
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-void Entree( int balID, int parkingID, int immatriculationID, int nombrePlacesOccupeesID,
+void Entree( int balID, int parkingID, int nombrePlacesOccupeesID,
                 int requeteID, int semID, int numSemRequete, long type )
 {	
 	// Initialisation des globaux privés
 	boiteID = balID;
 	parkID = parkingID;
-	immatID = immatriculationID;
 	nbPlacesID = nombrePlacesOccupeesID;
 	reqID = requeteID;
     semaphoreID = semID;
