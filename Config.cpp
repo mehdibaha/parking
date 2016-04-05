@@ -4,7 +4,7 @@
 	 Implémentation des fonctions de conversion pour le module graphique
                              -------------------
     début                : 16/03/2016
-    copyright            : (C) par Ruben
+    copyright            : 2016 (C) par Ruben
     e-mail               : ruben.pericas-moya@insa-lyon.fr
 *************************************************************************/
 

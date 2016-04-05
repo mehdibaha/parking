@@ -3,7 +3,7 @@
 	Configuration de l'application : constantes et structures de données
                              -------------------
     début                : 16/03/2016
-    copyright            : (C) par Ruben
+    copyright            : 2016 (C) par Ruben
     e-mail               : ruben.pericas-moya@insa-lyon.fr
 *************************************************************************/
 
