@@ -3,7 +3,7 @@
 		    Tâche permettant à une voiture de sortir du parking
                              -------------------
     début                : 16/03/2016
-    copyright            : (C) par Ruben
+    copyright            : 2016 (C) par Ruben
     e-mail               : ruben.pericas-moya@insa-lyon.fr
 *************************************************************************/
 
@@ -73,6 +73,10 @@ static void fin ( int noSignal )
 //			et on attend que ce soit fait
 //		On met fin à la tâche avec le code 0
 {
+	if(noSignal != SIGUSR2)
+	{
+		return;
+	}
 	sigaction( SIGCHLD, NULL, NULL );
 	shmdt( nbPlaces );
 	shmdt( parking );
@@ -122,6 +126,10 @@ static void mortFils ( int noSignal )
 //				On envoie SIGUSR1 à la requête la plus prioritaire
 //		NB: la priorité est telle que décrite dans Sortie.h, pour la fonction Sortie
 {
+	if(noSignal != SIGCHLD)
+	{
+		return;
+	}
 	// Prises des informations liées à la mort du fils
 	time_t heureDepart = time( NULL );
 	int statut;

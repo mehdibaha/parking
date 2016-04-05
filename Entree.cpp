@@ -59,9 +59,6 @@ static int signalRecu = 0;
 static Voiture msg;
 static long typeBar;
 
-// Debug
-static ofstream log;
-
 //------------------------------------------------------ Fonctions privées
 static void garer(Voiture& message)
 // Mode d'emploi :
@@ -151,6 +148,10 @@ static void placeLibre( int noSignal )
 // Mode d'emploi :
 // Gère le signal SIGUSR1
 {
+	if(noSignal != SIGUSR1)
+	{
+		return;
+	}
 	// SIGUSR1 reçu
 	// Init sembuf
 	struct sembuf semOp;
@@ -175,6 +176,10 @@ static void fin ( int noSignal )
 // Mode d'emploi :
 // Met fin à la tâche principale
 {
+	if(noSignal != SIGUSR2)
+	{
+		return;
+	}
 	// Réception signal de fin
     sigaction( SIGCHLD, NULL, NULL );
 	sigaction( SIGUSR1, NULL, NULL );
@@ -199,6 +204,10 @@ static void mortFils ( int noSignal )
 // Mode d'emploi :
 // Gère l'arrivée d'une voiture (mort fils correspond à l'appel Mere de Garer)
 {
+	if(noSignal != SIGCHLD)
+	{
+		return;
+	}
     // Prises des informations liées à la mort du fils
     int statut;
     pid_t pidFils = waitpid( -1, &statut, WNOHANG );
