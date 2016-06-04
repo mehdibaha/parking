@@ -25,7 +25,7 @@
 
 //////////////////////////////////////////////////////////////////  PUBLIC
 //---------------------------------------------------- Fonctions publiques
-void Entree( int balID, int parkingID, int nombrePlacesOccupeesID,
+void Entree( int balID,int parkingID, int nombrePlacesOccupeesID,
 				int requeteID, int semID, int numSemRequete, long type );
 
 #endif // ENTREE_H
